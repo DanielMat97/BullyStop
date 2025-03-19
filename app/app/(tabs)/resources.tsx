@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'r
 import { useTheme } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Resource = {
   id: string;
@@ -62,78 +63,83 @@ export default function ResourcesScreen() {
   };
 
   return (
-    <ScrollView 
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.scrollContent}
-    >
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>
-          Recursos Educativos
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.text + '80' }]}>
-          Materiales para aprender y prevenir el acoso escolar
-        </Text>
-      </View>
-
-      <View style={styles.resourceList}>
-        {resources.map((resource) => (
-          <TouchableOpacity
-            key={resource.id}
-            style={[styles.resourceCard, { backgroundColor: colors.card }]}
-            onPress={() => handleResourcePress(resource)}
-          >
-            <View style={[styles.iconContainer, { backgroundColor: resource.color + '20' }]}>
-              <MaterialCommunityIcons 
-                name={resource.icon} 
-                size={24} 
-                color={resource.color} 
-              />
-            </View>
-            <View style={styles.resourceContent}>
-              <Text style={[styles.resourceTitle, { color: colors.text }]}>
-                {resource.title}
-              </Text>
-              <Text style={[styles.resourceDescription, { color: colors.text + '80' }]}>
-                {resource.description}
-              </Text>
-            </View>
-            <MaterialCommunityIcons 
-              name="chevron-right" 
-              size={24} 
-              color={colors.text + '80'} 
-            />
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <View style={[styles.emergencySection, { backgroundColor: '#FF444420' }]}>
-        <MaterialCommunityIcons 
-          name="alert-circle" 
-          size={32} 
-          color="#FF4444" 
-          style={styles.emergencyIcon}
-        />
-        <Text style={[styles.emergencyTitle, { color: '#FF4444' }]}>
-          ¿Necesitas ayuda inmediata?
-        </Text>
-        <Text style={[styles.emergencyText, { color: colors.text }]}>
-          Si estás experimentando acoso escolar, no dudes en usar el botón de pánico o contactar a las autoridades.
-        </Text>
-        <TouchableOpacity 
-          style={[styles.emergencyButton, { backgroundColor: '#FF4444' }]}
-          onPress={() => router.push('/(tabs)/panic')}
-        >
-          <Text style={styles.emergencyButtonText}>
-            Ir al Botón de Pánico
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: colors.text }]}>
+            Recursos Educativos
           </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          <Text style={[styles.subtitle, { color: colors.text + '80' }]}>
+            Materiales para aprender y prevenir el acoso escolar
+          </Text>
+        </View>
+
+        <View style={styles.resourceList}>
+          {resources.map((resource) => (
+            <TouchableOpacity
+              key={resource.id}
+              style={[styles.resourceCard, { backgroundColor: colors.card }]}
+              onPress={() => handleResourcePress(resource)}
+            >
+              <View style={[styles.iconContainer, { backgroundColor: resource.color + '20' }]}>
+                <MaterialCommunityIcons 
+                  name={resource.icon} 
+                  size={24} 
+                  color={resource.color} 
+                />
+              </View>
+              <View style={styles.resourceContent}>
+                <Text style={[styles.resourceTitle, { color: colors.text }]}>
+                  {resource.title}
+                </Text>
+                <Text style={[styles.resourceDescription, { color: colors.text + '80' }]}>
+                  {resource.description}
+                </Text>
+              </View>
+              <MaterialCommunityIcons 
+                name="chevron-right" 
+                size={24} 
+                color={colors.text + '80'} 
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <View style={[styles.emergencySection, { backgroundColor: '#FF444420' }]}>
+          <MaterialCommunityIcons 
+            name="alert-circle" 
+            size={32} 
+            color="#FF4444" 
+            style={styles.emergencyIcon}
+          />
+          <Text style={[styles.emergencyTitle, { color: '#FF4444' }]}>
+            ¿Necesitas ayuda inmediata?
+          </Text>
+          <Text style={[styles.emergencyText, { color: colors.text }]}>
+            Si estás experimentando acoso escolar, no dudes en usar el botón de pánico o contactar a las autoridades.
+          </Text>
+          <TouchableOpacity 
+            style={[styles.emergencyButton, { backgroundColor: '#FF4444' }]}
+            onPress={() => router.push('/(tabs)/panic')}
+          >
+            <Text style={styles.emergencyButtonText}>
+              Ir al Botón de Pánico
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
   },
   scrollContent: {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Animated } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PanicScreen() {
   const { colors } = useTheme();
@@ -67,7 +68,7 @@ export default function PanicScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.content}>
         <Text style={[styles.title, { color: colors.text }]}>
           Botón de Pánico
@@ -79,7 +80,7 @@ export default function PanicScreen() {
 
         <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
           <TouchableOpacity
-            style={[styles.panicButton, { backgroundColor: colors.error }]}
+            style={[styles.panicButton, { backgroundColor: '#FF4444' }]}
             onPress={handlePanicPress}
             disabled={loading}
           >
@@ -109,10 +110,10 @@ export default function PanicScreen() {
             <MaterialCommunityIcons 
               name="phone" 
               size={24} 
-              color={colors.error} 
+              color="#FF4444" 
             />
             <Text style={[styles.contactText, { color: colors.text }]}>
-              Llamar a Emergencias (911)
+              Llamar a Emergencias (123)
             </Text>
           </TouchableOpacity>
 
@@ -126,7 +127,7 @@ export default function PanicScreen() {
             <MaterialCommunityIcons 
               name="school" 
               size={24} 
-              color={colors.error} 
+              color="#FF4444" 
             />
             <Text style={[styles.contactText, { color: colors.text }]}>
               Contactar Escuela
@@ -134,17 +135,17 @@ export default function PanicScreen() {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
   },
   content: {
     flex: 1,
+    padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },

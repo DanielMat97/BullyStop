@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { useTheme } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type QuickAction = {
   title: string;
@@ -39,77 +40,82 @@ export default function HomeScreen() {
   ];
 
   return (
-    <ScrollView 
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.scrollContent}
-    >
-      <View style={styles.header}>
-        <Text style={[styles.welcomeText, { color: colors.text }]}>
-          Bienvenido a BullyStop
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.text + '80' }]}>
-          Tu espacio seguro para prevenir el acoso escolar
-        </Text>
-      </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.header}>
+          <Text style={[styles.welcomeText, { color: colors.text }]}>
+            Bienvenido a BullyStop
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.text + '80' }]}>
+            Tu espacio seguro para prevenir el acoso escolar
+          </Text>
+        </View>
 
-      <View style={styles.quickActions}>
-        {quickActions.map((action, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[styles.actionCard, { backgroundColor: colors.card }]}
-            onPress={() => router.push(action.route)}
-          >
-            <View style={[styles.iconContainer, { backgroundColor: action.color + '20' }]}>
-              <MaterialCommunityIcons name={action.icon} size={24} color={action.color} />
-            </View>
-            <View style={styles.actionContent}>
-              <Text style={[styles.actionTitle, { color: colors.text }]}>
-                {action.title}
-              </Text>
-              <Text style={[styles.actionDescription, { color: colors.text + '80' }]}>
-                {action.description}
-              </Text>
-            </View>
-            <MaterialCommunityIcons 
-              name="chevron-right" 
-              size={24} 
-              color={colors.text + '80'} 
-            />
-          </TouchableOpacity>
-        ))}
-      </View>
+        <View style={styles.quickActions}>
+          {quickActions.map((action, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[styles.actionCard, { backgroundColor: colors.card }]}
+              onPress={() => router.push(action.route)}
+            >
+              <View style={[styles.iconContainer, { backgroundColor: action.color + '20' }]}>
+                <MaterialCommunityIcons name={action.icon} size={24} color={action.color} />
+              </View>
+              <View style={styles.actionContent}>
+                <Text style={[styles.actionTitle, { color: colors.text }]}>
+                  {action.title}
+                </Text>
+                <Text style={[styles.actionDescription, { color: colors.text + '80' }]}>
+                  {action.description}
+                </Text>
+              </View>
+              <MaterialCommunityIcons 
+                name="chevron-right" 
+                size={24} 
+                color={colors.text + '80'} 
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
 
-      <View style={[styles.statsContainer, { backgroundColor: colors.card }]}>
-        <Text style={[styles.statsTitle, { color: colors.text }]}>
-          Tu Bienestar
-        </Text>
-        <View style={styles.statsGrid}>
-          <View style={styles.statItem}>
-            <Text style={[styles.statValue, { color: colors.primary }]}>0</Text>
-            <Text style={[styles.statLabel, { color: colors.text + '80' }]}>
-              Encuestas Completadas
-            </Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={[styles.statValue, { color: colors.primary }]}>0</Text>
-            <Text style={[styles.statLabel, { color: colors.text + '80' }]}>
-              Alertas Enviadas
-            </Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={[styles.statValue, { color: colors.primary }]}>0</Text>
-            <Text style={[styles.statLabel, { color: colors.text + '80' }]}>
-              Recursos Revisados
-            </Text>
+        <View style={[styles.statsContainer, { backgroundColor: colors.card }]}>
+          <Text style={[styles.statsTitle, { color: colors.text }]}>
+            Tu Bienestar
+          </Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, { color: colors.primary }]}>0</Text>
+              <Text style={[styles.statLabel, { color: colors.text + '80' }]}>
+                Encuestas Completadas
+              </Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, { color: colors.primary }]}>0</Text>
+              <Text style={[styles.statLabel, { color: colors.text + '80' }]}>
+                Alertas Enviadas
+              </Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, { color: colors.primary }]}>0</Text>
+              <Text style={[styles.statLabel, { color: colors.text + '80' }]}>
+                Recursos Revisados
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
   },
   scrollContent: {
