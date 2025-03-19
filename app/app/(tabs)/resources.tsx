@@ -24,7 +24,7 @@ export default function ResourcesScreen() {
       description: 'Aprende a identificar los diferentes tipos de acoso y sus consecuencias',
       type: 'video',
       icon: 'play-circle',
-      color: '#FF4444',
+      color: '#008000',
       url: 'https://example.com/video1',
     },
     {
@@ -33,7 +33,7 @@ export default function ResourcesScreen() {
       description: 'Consejos prácticos para prevenir y actuar ante situaciones de acoso',
       type: 'guide',
       icon: 'book-open-variant',
-      color: '#4CAF50',
+      color: '#556B2F',
       url: 'https://example.com/guide1',
     },
     {
@@ -42,7 +42,7 @@ export default function ResourcesScreen() {
       description: 'Lecturas recomendadas sobre el acoso escolar y su impacto',
       type: 'article',
       icon: 'newspaper-variant',
-      color: '#2196F3',
+      color: '#007A33',
       url: 'https://example.com/articles',
     },
     {
@@ -51,7 +51,7 @@ export default function ResourcesScreen() {
       description: 'Organizaciones y profesionales especializados en acoso escolar',
       type: 'contact',
       icon: 'phone',
-      color: '#FFA726',
+      color: '#008000',
       url: 'https://example.com/contacts',
     },
   ]);
@@ -108,21 +108,21 @@ export default function ResourcesScreen() {
           ))}
         </View>
 
-        <View style={[styles.emergencySection, { backgroundColor: '#FF444420' }]}>
+        <View style={[styles.emergencySection, { backgroundColor: '#00800020' }]}>
           <MaterialCommunityIcons 
             name="alert-circle" 
             size={32} 
-            color="#FF4444" 
+            color="#008000" 
             style={styles.emergencyIcon}
           />
-          <Text style={[styles.emergencyTitle, { color: '#FF4444' }]}>
+          <Text style={[styles.emergencyTitle, { color: '#008000' }]}>
             ¿Necesitas ayuda inmediata?
           </Text>
           <Text style={[styles.emergencyText, { color: colors.text }]}>
             Si estás experimentando acoso escolar, no dudes en usar el botón de pánico o contactar a las autoridades.
           </Text>
           <TouchableOpacity 
-            style={[styles.emergencyButton, { backgroundColor: '#FF4444' }]}
+            style={[styles.emergencyButton, { backgroundColor: '#008000' }]}
             onPress={() => router.push('/(tabs)/panic')}
           >
             <Text style={styles.emergencyButtonText}>

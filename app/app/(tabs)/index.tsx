@@ -21,21 +21,21 @@ export default function HomeScreen() {
       description: 'Envía una alerta de emergencia',
       icon: 'alert-circle',
       route: '/(tabs)/panic',
-      color: '#FF4444',
+      color: '#008000',
     },
     {
       title: 'Encuestas',
       description: 'Completa las encuestas de bienestar',
       icon: 'clipboard-list',
       route: '/(tabs)/surveys',
-      color: '#4CAF50',
+      color: '#556B2F',
     },
     {
       title: 'Recursos',
       description: 'Accede a materiales de ayuda',
       icon: 'book-open-variant',
       route: '/(tabs)/resources',
-      color: '#2196F3',
+      color: '#007A33',
     },
   ];
 

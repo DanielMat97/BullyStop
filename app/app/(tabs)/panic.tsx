@@ -80,7 +80,7 @@ export default function PanicScreen() {
 
         <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
           <TouchableOpacity
-            style={[styles.panicButton, { backgroundColor: '#FF4444' }]}
+            style={[styles.panicButton, { backgroundColor: '#008000' }]}
             onPress={handlePanicPress}
             disabled={loading}
           >
@@ -110,7 +110,7 @@ export default function PanicScreen() {
             <MaterialCommunityIcons 
               name="phone" 
               size={24} 
-              color="#FF4444" 
+              color="#008000" 
             />
             <Text style={[styles.contactText, { color: colors.text }]}>
               Llamar a Emergencias (123)
@@ -127,7 +127,7 @@ export default function PanicScreen() {
             <MaterialCommunityIcons 
               name="school" 
               size={24} 
-              color="#FF4444" 
+              color="#008000" 
             />
             <Text style={[styles.contactText, { color: colors.text }]}>
               Contactar Escuela
