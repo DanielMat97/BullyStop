@@ -161,3 +161,102 @@ export const setAuthToken = (token: string | null) => {
     console.log('Token de autenticación removido de headers de API');
   }
 };
+
+// Interfaces for alerts
+export interface PanicAlert {
+  userId: number;
+  type: string;
+  timestamp: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+    accuracy?: number;
+  };
+  deviceInfo?: {
+    platform: string;
+    model?: string;
+  };
+}
+
+export interface AlertResponse {
+  id: number;
+  userId: number;
+  type: string;
+  timestamp: string;
+  status: 'sent' | 'received' | 'processing' | 'resolved';
+  createdAt: string;
+}
+
+// Alert API service
+export const alertApi = {
+  sendPanicAlert: async (alertData: PanicAlert, token: string): Promise<AlertResponse> => {
+    try {
+      return await api.post('/alerts', alertData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (error) {
+      console.error('Error al enviar alerta de pánico:', error);
+      throw error;
+    }
+  },
+
+  getAlerts: async (userId: number, token: string): Promise<AlertResponse[]> => {
+    try {
+      return await api.get(`/alerts?userId=${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (error) {
+      console.error('Error al obtener alertas:', error);
+      throw error;
+    }
+  },
+};
+
+// Interfaces for panic alerts
+export interface PanicAlertDto {
+  latitude: number;
+  longitude: number;
+  userId: number;
+}
+
+export interface PanicAlertResponse {
+  id: number;
+  latitude: number;
+  longitude: number;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Panic alert API service
+export const panicAlertApi = {
+  sendPanicAlert: async (alertData: PanicAlertDto, token: string): Promise<PanicAlertResponse> => {
+    try {
+      return await api.post('/panic-alerts', alertData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (error) {
+      console.error('Error al enviar alerta de pánico:', error);
+      throw error;
+    }
+  },
+
+  getAlerts: async (userId: number, token: string): Promise<PanicAlertResponse[]> => {
+    try {
+      return await api.get(`/panic-alerts?userId=${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (error) {
+      console.error('Error al obtener alertas de pánico:', error);
+      throw error;
+    }
+  },
+};
