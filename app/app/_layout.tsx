@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import { ThemeProvider } from '@react-navigation/native';
@@ -8,8 +7,8 @@ import { AuthProvider } from '../providers/AuthProvider';
 
 // Ignorar warnings específicos que pueden causar problemas en producción
 LogBox.ignoreLogs([
-  'Warning: Failed prop type',
   'Non-serializable values were found in the navigation state',
+  'ViewPropTypes will be removed from React Native',
 ]);
 
 export default function RootLayout() {
@@ -25,25 +24,49 @@ export default function RootLayout() {
             contentStyle: {
               backgroundColor: theme.colors.background,
             },
-          }}
+          }} 
         >
           <Stack.Screen 
             name="index" 
-            options={{
+            options={{ 
               animation: 'none',
-            }}
+            }} 
           />
           <Stack.Screen 
             name="(auth)" 
-            options={{
+            options={{ 
               animation: 'fade',
-            }}
+            }} 
           />
           <Stack.Screen 
             name="(tabs)" 
-            options={{
+            options={{ 
               animation: 'fade',
-            }}
+            }} 
+          />
+          <Stack.Screen 
+            name="resources/about-bullying" 
+            options={{ 
+              animation: 'slide_from_right',
+            }} 
+          />
+          <Stack.Screen 
+            name="resources/prevention-guide" 
+            options={{ 
+              animation: 'slide_from_right',
+            }} 
+          />
+          <Stack.Screen 
+            name="resources/educational-articles" 
+            options={{ 
+              animation: 'slide_from_right',
+            }} 
+          />
+          <Stack.Screen 
+            name="resources/help-contacts" 
+            options={{ 
+              animation: 'slide_from_right',
+            }} 
           />
         </Stack>
       </AuthProvider>

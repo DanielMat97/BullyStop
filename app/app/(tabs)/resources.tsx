@@ -25,7 +25,7 @@ export default function ResourcesScreen() {
       type: 'video',
       icon: 'play-circle',
       color: '#008000',
-      url: 'https://example.com/video1',
+      url: '/resources/about-bullying',
     },
     {
       id: '2',
@@ -34,7 +34,7 @@ export default function ResourcesScreen() {
       type: 'guide',
       icon: 'book-open-variant',
       color: '#556B2F',
-      url: 'https://example.com/guide1',
+      url: '/resources/prevention-guide',
     },
     {
       id: '3',
@@ -43,7 +43,7 @@ export default function ResourcesScreen() {
       type: 'article',
       icon: 'newspaper-variant',
       color: '#007A33',
-      url: 'https://example.com/articles',
+      url: '/resources/educational-articles',
     },
     {
       id: '4',
@@ -52,13 +52,17 @@ export default function ResourcesScreen() {
       type: 'contact',
       icon: 'phone',
       color: '#008000',
-      url: 'https://example.com/contacts',
+      url: '/resources/help-contacts',
     },
   ]);
 
   const handleResourcePress = (resource: Resource) => {
     if (resource.url) {
-      Linking.openURL(resource.url);
+      if (resource.url.startsWith('http')) {
+        Linking.openURL(resource.url);
+      } else {
+        router.push(resource.url as any);
+      }
     }
   };
 
