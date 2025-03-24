@@ -25,6 +25,11 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
       const response = await authApi.login(credentials);
       const { user, token } = response;
 
+      // Verificar que el token existe
+      if (!token) {
+        throw new Error('No se recibió token de autenticación desde el servidor');
+      }
+
       // Set token in axios default headers
       setAuthToken(token);
 
@@ -56,6 +61,11 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
       // Call API to register
       const response = await authApi.register(data);
       const { user, token } = response;
+
+      // Verificar que el token existe
+      if (!token) {
+        throw new Error('No se recibió token de autenticación desde el servidor');
+      }
 
       // Set token in axios default headers
       setAuthToken(token);

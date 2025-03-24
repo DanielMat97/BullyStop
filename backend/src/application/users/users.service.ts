@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../infraestructure/database/entities/users';
@@ -15,13 +19,14 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto) {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const user = this.userRepository.create({
       ...createUserDto,
       passwordHash: hashedPassword,
     });
-    return this.userRepository.save(user);
+    await this.userRepository.save(user);
+    return this.login(user.email, createUserDto.password);
   }
 
   async findAll(): Promise<User[]> {
@@ -38,7 +43,7 @@ export class UsersService {
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
-    
+
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
@@ -60,30 +65,30 @@ export class UsersService {
 
   async login(email: string, password: string) {
     const user = await this.findByEmail(email);
-    
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    
+
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    
+
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    
-    const payload = { 
+
+    const payload = {
       sub: user.id,
       email: user.email,
-      name: user.name
+      name: user.name,
     };
-    
+
     return {
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
       },
-      auth_token: this.jwtService.sign(payload),
+      token: this.jwtService.sign(payload),
     };
   }
 }

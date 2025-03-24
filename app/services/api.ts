@@ -62,11 +62,29 @@ api.interceptors.response.use(
 // Log API URL and configuration at startup
 logApiConfig();
 
+// Declaración para TypeScript: axios con interceptor que devuelve directamente data
+declare module 'axios' {
+  export interface AxiosInstance {
+    post<T = any, R = T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<R>;
+    get<T = any, R = T>(url: string, config?: AxiosRequestConfig): Promise<R>;
+    patch<T = any, R = T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<R>;
+    delete<T = any, R = T>(url: string, config?: AxiosRequestConfig): Promise<R>;
+  }
+}
+
 // Auth API service
 export const authApi = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     try {
-      return await api.post('/users/login', credentials);
+      const data = await api.post<LoginCredentials, AuthResponse>('/users/login', credentials);
+      
+      // Verificar que la respuesta tiene la estructura esperada
+      if (!data || !data.user || !data.token) {
+        console.error('Respuesta de API incompleta:', data);
+        throw new Error('Respuesta del servidor incompleta');
+      }
+      
+      return data;
     } catch (error) {
       console.error('Error en API de login:', error);
       throw error;
@@ -75,7 +93,15 @@ export const authApi = {
 
   register: async (data: RegisterData): Promise<AuthResponse> => {
     try {
-      return await api.post('/users', data);
+      const responseData = await api.post<RegisterData, AuthResponse>('/users', data);
+      
+      // Verificar que la respuesta tiene la estructura esperada
+      if (!responseData || !responseData.user || !responseData.token) {
+        console.error('Respuesta de API incompleta:', responseData);
+        throw new Error('Respuesta del servidor incompleta');
+      }
+      
+      return responseData;
     } catch (error) {
       console.error('Error en API de registro:', error);
       throw error;
@@ -84,7 +110,7 @@ export const authApi = {
 
   getCurrentUser: async (token: string): Promise<User> => {
     try {
-      return await api.get('/users/me', {
+      return await api.get<null, User>('/users/me', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

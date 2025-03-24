@@ -11,6 +11,10 @@ export const storage = {
   // Save auth token
   setToken: async (token: string): Promise<void> => {
     try {
+      if (token === undefined || token === null) {
+        console.warn('Intento de guardar un token nulo o indefinido. Operación ignorada.');
+        return;
+      }
       await AsyncStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
     } catch (error) {
       console.error('Error saving auth token:', error);

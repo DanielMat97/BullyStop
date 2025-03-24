@@ -30,6 +30,4 @@ export class User {
 
   @OneToMany(() => SurveyResponse, (response) => response.user)
   surveyResponses: SurveyResponse[];
-
-  
 }
