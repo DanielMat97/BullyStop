@@ -336,7 +336,6 @@ export interface Question {
   question: string;
   type: QuestionType;
   options?: string[];
-  required?: boolean;
 }
 
 export interface AnswerDto {
@@ -364,6 +363,7 @@ export interface SurveyResponse {
     id: number;
     title: string;
     questions: {
+      id: number;
       question: string;
       type: QuestionType;
       options?: string[];

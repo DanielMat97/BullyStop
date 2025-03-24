@@ -6,11 +6,12 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, Stack } from "expo-router";
+import { useLocalSearchParams, Stack, router } from "expo-router";
 import { surveyApi, SurveyResponse, QuestionType } from "../../../services/api";
 import { useAuthContext } from "../../../hooks/useAuthContext";
 
@@ -380,6 +381,40 @@ export default function SurveyResponsesScreen() {
       fontSize: 14,
       color: "#FF4444",
     },
+    backButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+    },
+    backButtonText: {
+      fontSize: 16,
+      marginLeft: 5,
+    },
+    floatingBackButton: {
+      position: 'absolute',
+      bottom: 20,
+      right: 20,
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      borderRadius: 25,
+      elevation: 5,
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+    },
+    floatingBackButtonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: '500',
+      marginLeft: 8,
+    },
   });
 
   if (loading) {
@@ -436,6 +471,21 @@ export default function SurveyResponsesScreen() {
         options={{
           title: "Tus respuestas",
           headerBackTitle: "Atrás",
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={styles.backButton}
+            >
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={24}
+                color={colors.text}
+              />
+              <Text style={[styles.backButtonText, { color: colors.text }]}>
+                Atrás
+              </Text>
+            </TouchableOpacity>
+          ),
         }}
       />
 
@@ -459,7 +509,7 @@ export default function SurveyResponsesScreen() {
                     backgroundColor:
                       response.status === "COMPLETED"
                         ? "#4CAF5020"
-                        : "#FF525220",
+                        : "#4CAF5020",
                   },
                 ]}
               >
@@ -468,11 +518,11 @@ export default function SurveyResponsesScreen() {
                     styles.statusText,
                     {
                       color:
-                        response.status === "COMPLETED" ? "#4CAF50" : "#FF5252",
+                        response.status === "COMPLETED" ? "#4CAF50" : "#4CAF50",
                     },
                   ]}
                 >
-                  {response.status === "COMPLETED" ? "Completada" : "Pendiente"}
+                  {response.status === "COMPLETED" ? "Completada" : "Completada"}
                 </Text>
               </View>
             </View>
@@ -480,11 +530,13 @@ export default function SurveyResponsesScreen() {
             <View style={styles.answersContainer}>
               {response.answers.map((answer, index) => {
                 const question = response.survey.questions.find(
-                  (q) => q.question === answer.question
+                  (q) => q.id === Number(answer.question)
                 );
 
                 if (!question) {
-                  console.warn(`Question not found for answer with questionId: ${answer.question}`);
+                  console.warn(
+                    `Question not found for answer with questionId: ${answer.question}`
+                  );
                   return null;
                 }
 
@@ -503,6 +555,14 @@ export default function SurveyResponsesScreen() {
           </View>
         ))}
       </ScrollView>
+
+      <TouchableOpacity
+        style={[styles.floatingBackButton, { backgroundColor: colors.primary }]}
+        onPress={() => router.back()}
+      >
+        <MaterialCommunityIcons name="arrow-left" size={24} color="white" />
+        <Text style={styles.floatingBackButtonText}>Volver</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
