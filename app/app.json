@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "app",
-    "slug": "app",
+    "name": "BullyStop",
+    "slug": "bullystop",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "bullystop",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -15,7 +15,14 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.policia.bullystop",
+      "versionCode": 1,
+      "permissions": [],
+      "buildToolsVersion": "33.0.0",
+      "compileSdkVersion": 33,
+      "targetSdkVersion": 33,
+      "minSdkVersion": 21
     },
     "web": {
       "bundler": "metro",
@@ -35,7 +42,17 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": true
-    }
+      "typedRoutes": true,
+      "tsconfigPaths": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "c8b3b066-34eb-4620-b0c9-5cd543f72690"
+      }
+    },
+    "owner": "stonestore"
   }
 }

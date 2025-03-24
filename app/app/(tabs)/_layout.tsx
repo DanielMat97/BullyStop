@@ -1,20 +1,28 @@
+import { useEffect } from 'react';
 import { Tabs } from 'expo-router';
+import { MaterialIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { useTheme } from '@react-navigation/native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useAuthContext } from '../../hooks/useAuthContext';
 
-export default function TabsLayout() {
+export default function TabLayout() {
   const { colors } = useTheme();
+  const { requireAuth } = useAuthContext();
+
+  // Ensure user is authenticated for all tab screens
+  useEffect(() => {
+    requireAuth();
+  }, []);
 
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.text + '80',
+        tabBarInactiveTintColor: colors.text,
         tabBarStyle: {
-          backgroundColor: colors.background,
-          borderTopColor: colors.border,
+          backgroundColor: colors.card,
         },
+        tabBarShowLabel: true,
+        headerShown: false,
       }}
     >
       <Tabs.Screen
@@ -22,16 +30,7 @@ export default function TabsLayout() {
         options={{
           title: 'Inicio',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="home" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="panic"
-        options={{
-          title: 'Botón de Pánico',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="alert-circle" size={size} color={color} />
+            <MaterialIcons name="home" size={size} color={color} />
           ),
         }}
       />
@@ -40,7 +39,16 @@ export default function TabsLayout() {
         options={{
           title: 'Encuestas',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="clipboard-list" size={size} color={color} />
+            <MaterialIcons name="assignment" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="panic"
+        options={{
+          title: 'Pánico',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="warning" size={size} color={color} />
           ),
         }}
       />
@@ -49,7 +57,7 @@ export default function TabsLayout() {
         options={{
           title: 'Recursos',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="book-open-variant" size={size} color={color} />
+            <FontAwesome5 name="book" size={size} color={color} />
           ),
         }}
       />

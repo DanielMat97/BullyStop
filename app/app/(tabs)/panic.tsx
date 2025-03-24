@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Animated } from 'react-native';
-import { useTheme } from '@react-navigation/native';
+import { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Animated, Dimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { API_URL } from '../../config/api';
 
 export default function PanicScreen() {
   const { colors } = useTheme();
@@ -28,7 +29,7 @@ export default function PanicScreen() {
       ]).start();
 
       // TODO: Implement API call to send panic alert
-      // const response = await fetch('http://localhost:3000/alerts', {
+      // const response = await fetch(`${API_URL}/alerts`, {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',

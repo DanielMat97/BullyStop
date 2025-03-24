@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Survey = {
   id: string;
@@ -45,99 +46,104 @@ export default function SurveysScreen() {
   };
 
   return (
-    <ScrollView 
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.scrollContent}
-    >
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>
-          Encuestas
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.text + '80' }]}>
-          Completa las encuestas para ayudarnos a mejorar
-        </Text>
-      </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: colors.text }]}>
+            Encuestas
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.text + '80' }]}>
+            Completa las encuestas para ayudarnos a mejorar
+          </Text>
+        </View>
 
-      <View style={styles.surveyList}>
-        {surveys.map((survey) => (
-          <TouchableOpacity
-            key={survey.id}
-            style={[
-              styles.surveyCard,
-              { 
-                backgroundColor: colors.card,
-                opacity: survey.status === 'completed' ? 0.7 : 1,
-              }
-            ]}
-            onPress={() => handleSurveyPress(survey)}
-          >
-            <View style={styles.surveyHeader}>
-              <View style={styles.surveyTitleContainer}>
-                <Text style={[styles.surveyTitle, { color: colors.text }]}>
-                  {survey.title}
-                </Text>
-                <View style={[
-                  styles.statusBadge,
-                  { 
-                    backgroundColor: survey.status === 'completed' 
-                      ? colors.primary + '20'
-                      : colors.error + '20'
-                  }
-                ]}>
-                  <Text style={[
-                    styles.statusText,
+        <View style={styles.surveyList}>
+          {surveys.map((survey) => (
+            <TouchableOpacity
+              key={survey.id}
+              style={[
+                styles.surveyCard,
+                { 
+                  backgroundColor: colors.card,
+                  opacity: survey.status === 'completed' ? 0.7 : 1,
+                }
+              ]}
+              onPress={() => handleSurveyPress(survey)}
+            >
+              <View style={styles.surveyHeader}>
+                <View style={styles.surveyTitleContainer}>
+                  <Text style={[styles.surveyTitle, { color: colors.text }]}>
+                    {survey.title}
+                  </Text>
+                  <View style={[
+                    styles.statusBadge,
                     { 
-                      color: survey.status === 'completed'
-                        ? colors.primary
-                        : colors.error
+                      backgroundColor: survey.status === 'completed' 
+                        ? colors.primary + '20'
+                        : '#FF444420'
                     }
                   ]}>
-                    {survey.status === 'completed' ? 'Completada' : 'Pendiente'}
-                  </Text>
+                    <Text style={[
+                      styles.statusText,
+                      { 
+                        color: survey.status === 'completed'
+                          ? colors.primary
+                          : '#FF4444'
+                      }
+                    ]}>
+                      {survey.status === 'completed' ? 'Completada' : 'Pendiente'}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-              <MaterialCommunityIcons 
-                name="chevron-right" 
-                size={24} 
-                color={colors.text + '80'} 
-              />
-            </View>
-
-            <Text style={[styles.surveyDescription, { color: colors.text + '80' }]}>
-              {survey.description}
-            </Text>
-
-            <View style={styles.surveyFooter}>
-              <View style={styles.dateContainer}>
                 <MaterialCommunityIcons 
-                  name="calendar" 
-                  size={16} 
+                  name="chevron-right" 
+                  size={24} 
                   color={colors.text + '80'} 
                 />
-                <Text style={[styles.dateText, { color: colors.text + '80' }]}>
-                  Fecha límite: {new Date(survey.dueDate).toLocaleDateString()}
-                </Text>
               </View>
-              {survey.status === 'pending' && (
-                <TouchableOpacity 
-                  style={[styles.startButton, { backgroundColor: colors.primary }]}
-                  onPress={() => handleSurveyPress(survey)}
-                >
-                  <Text style={styles.startButtonText}>
-                    Comenzar
+
+              <Text style={[styles.surveyDescription, { color: colors.text + '80' }]}>
+                {survey.description}
+              </Text>
+
+              <View style={styles.surveyFooter}>
+                <View style={styles.dateContainer}>
+                  <MaterialCommunityIcons 
+                    name="calendar" 
+                    size={16} 
+                    color={colors.text + '80'} 
+                  />
+                  <Text style={[styles.dateText, { color: colors.text + '80' }]}>
+                    Fecha límite: {new Date(survey.dueDate).toLocaleDateString()}
                   </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </ScrollView>
+                </View>
+                {survey.status === 'pending' && (
+                  <TouchableOpacity 
+                    style={[styles.startButton, { backgroundColor: colors.primary }]}
+                    onPress={() => handleSurveyPress(survey)}
+                  >
+                    <Text style={styles.startButtonText}>
+                      Comenzar
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
   },
   scrollContent: {

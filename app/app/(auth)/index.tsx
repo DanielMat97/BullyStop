@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
 import { useTheme } from '@react-navigation/native';
 import { Button } from '../../components/ui/button';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -26,20 +26,20 @@ export default function AuthScreen() {
         </Text>
 
         <View style={styles.buttonContainer}>
-          <Link href="/(auth)/login" asChild>
-            <Button style={styles.button}>
-              Iniciar Sesión
-            </Button>
-          </Link>
+          <Button 
+            style={styles.button}
+            onPress={() => router.push('/(auth)/login')}
+          >
+            Iniciar Sesión
+          </Button>
 
-          <Link href="/(auth)/register" asChild>
-            <Button 
-              style={styles.button}
-              variant="secondary"
-            >
-              Registrarse
-            </Button>
-          </Link>
+          <Button 
+            style={styles.button}
+            variant="secondary"
+            onPress={() => router.push('/(auth)/register')}
+          >
+            Registrarse
+          </Button>
         </View>
       </View>
     </View>

@@ -1,0 +1,765 @@
+openapi: 3.0.0
+info:
+  title: BullyStop API
+  version: 1.0.0
+  description: API para la gestión de usuarios y encuestas en BullyStop
+  contact:
+    name: DevSociety
+    email: support@bullystop.com
+
+servers:
+  - url: http://localhost:3000
+    description: Servidor de desarrollo
+  - url: https://api.bullystop.com
+    description: Servidor de producción
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID único del usuario
+        name:
+          type: string
+          description: Nombre completo del usuario
+          minLength: 3
+        email:
+          type: string
+          format: email
+          description: Correo electrónico del usuario
+        grade:
+          type: string
+          description: Grado escolar del usuario
+        emergencyContact:
+          type: string
+          description: Contacto de emergencia del usuario
+          nullable: true
+        isActive:
+          type: boolean
+          description: Estado del usuario
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación del usuario
+        updatedAt:
+          type: string
+          format: date-time
+          description: Fecha de última actualización del usuario
+      required:
+        - name
+        - email
+        - grade
+
+    CreateUserDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre completo del usuario
+          minLength: 3
+        email:
+          type: string
+          format: email
+          description: Correo electrónico del usuario
+        password:
+          type: string
+          description: Contraseña del usuario
+          minLength: 6
+        grade:
+          type: string
+          description: Grado escolar del usuario
+        emergencyContact:
+          type: string
+          description: Contacto de emergencia del usuario
+      required:
+        - name
+        - email
+        - password
+        - grade
+
+    UpdateUserDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre completo del usuario
+          minLength: 3
+        email:
+          type: string
+          format: email
+          description: Correo electrónico del usuario
+        password:
+          type: string
+          description: Nueva contraseña del usuario
+          minLength: 6
+        grade:
+          type: string
+          description: Grado escolar del usuario
+        emergencyContact:
+          type: string
+          description: Contacto de emergencia del usuario
+
+    QuestionType:
+      type: string
+      enum:
+        - multiple_choice
+        - single_choice
+        - text
+        - scale
+      description: Tipo de pregunta en la encuesta
+
+    Question:
+      type: object
+      properties:
+        question:
+          type: string
+          description: Texto de la pregunta
+        type:
+          $ref: '#/components/schemas/QuestionType'
+        options:
+          type: array
+          items:
+            type: string
+          description: Opciones disponibles para preguntas de selección
+      required:
+        - question
+        - type
+
+    Survey:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID único de la encuesta
+        title:
+          type: string
+          description: Título de la encuesta
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+          description: Lista de preguntas de la encuesta
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación de la encuesta
+        responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyResponse'
+          description: Respuestas a la encuesta
+      required:
+        - title
+        - questions
+
+    CreateSurveyDto:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Título de la encuesta
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+          minItems: 1
+          description: Lista de preguntas de la encuesta
+      required:
+        - title
+        - questions
+
+    UpdateSurveyDto:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Título de la encuesta
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+          minItems: 1
+          description: Lista de preguntas de la encuesta
+
+    SurveyResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID único de la respuesta
+        surveyId:
+          type: integer
+          description: ID de la encuesta respondida
+        userId:
+          type: integer
+          description: ID del usuario que respondió
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: integer
+                description: ID de la pregunta
+              answer:
+                type: string
+                description: Respuesta proporcionada
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de la respuesta
+        survey:
+          $ref: '#/components/schemas/Survey'
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+        - surveyId
+        - userId
+        - answers
+
+    CreateSurveyResponseDto:
+      type: object
+      properties:
+        surveyId:
+          type: integer
+          description: ID de la encuesta a responder
+        userId:
+          type: integer
+          description: ID del usuario que responde
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: integer
+                description: ID de la pregunta
+              answer:
+                type: string
+                description: Respuesta proporcionada
+          minItems: 1
+      required:
+        - surveyId
+        - userId
+        - answers
+
+    UpdateSurveyResponseDto:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: integer
+                description: ID de la pregunta
+              answer:
+                type: string
+                description: Respuesta proporcionada
+          minItems: 1
+
+    PanicAlert:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID único de la alerta
+        latitude:
+          type: number
+          format: float
+          description: Latitud de la ubicación de la alerta
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: float
+          description: Longitud de la ubicación de la alerta
+          minimum: -180
+          maximum: 180
+        timestamp:
+          type: string
+          format: date-time
+          description: Fecha y hora de la alerta
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+        - latitude
+        - longitude
+        - userId
+
+    CreatePanicAlertDto:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: float
+          description: Latitud de la ubicación de la alerta
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: float
+          description: Longitud de la ubicación de la alerta
+          minimum: -180
+          maximum: 180
+        userId:
+          type: integer
+          description: ID del usuario que envía la alerta
+      required:
+        - latitude
+        - longitude
+        - userId
+
+    UpdatePanicAlertDto:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: float
+          description: Latitud de la ubicación de la alerta
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: float
+          description: Longitud de la ubicación de la alerta
+          minimum: -180
+          maximum: 180
+
+  responses:
+    NotFoundError:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                example: 404
+              message:
+                type: string
+                example: Resource not found
+              error:
+                type: string
+                example: Not Found
+
+    ValidationError:
+      description: Error de validación
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                example: 400
+              message:
+                type: array
+                items:
+                  type: string
+                example: ["Invalid input data"]
+              error:
+                type: string
+                example: Bad Request
+
+paths:
+  /users:
+    post:
+      summary: Crear un nuevo usuario
+      description: Crea un nuevo usuario en el sistema
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserDto'
+      responses:
+        '201':
+          description: Usuario creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+    get:
+      summary: Obtener todos los usuarios
+      description: Retorna una lista de todos los usuarios registrados
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID del usuario
+
+    get:
+      summary: Obtener un usuario por ID
+      description: Retorna un usuario específico por su ID
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    patch:
+      summary: Actualizar un usuario
+      description: Actualiza los datos de un usuario existente
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserDto'
+      responses:
+        '200':
+          description: Usuario actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Eliminar un usuario
+      description: Elimina un usuario del sistema
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Usuario eliminado exitosamente
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /surveys:
+    post:
+      summary: Crear una nueva encuesta
+      description: Crea una nueva encuesta en el sistema
+      tags:
+        - Surveys
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSurveyDto'
+      responses:
+        '201':
+          description: Encuesta creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Survey'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+    get:
+      summary: Obtener todas las encuestas
+      description: Retorna una lista de todas las encuestas disponibles
+      tags:
+        - Surveys
+      responses:
+        '200':
+          description: Lista de encuestas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Survey'
+
+  /surveys/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID de la encuesta
+
+    get:
+      summary: Obtener una encuesta por ID
+      description: Retorna una encuesta específica por su ID
+      tags:
+        - Surveys
+      responses:
+        '200':
+          description: Encuesta encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Survey'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    patch:
+      summary: Actualizar una encuesta
+      description: Actualiza los datos de una encuesta existente
+      tags:
+        - Surveys
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSurveyDto'
+      responses:
+        '200':
+          description: Encuesta actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Survey'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Eliminar una encuesta
+      description: Elimina una encuesta del sistema
+      tags:
+        - Surveys
+      responses:
+        '200':
+          description: Encuesta eliminada exitosamente
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /panic-alerts:
+    post:
+      summary: Crear una nueva alerta de pánico
+      description: Crea una nueva alerta de pánico con la ubicación del usuario
+      tags:
+        - Panic Alerts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePanicAlertDto'
+      responses:
+        '201':
+          description: Alerta de pánico creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PanicAlert'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+    get:
+      summary: Obtener todas las alertas de pánico
+      description: Retorna una lista de todas las alertas de pánico. Se puede filtrar por usuario usando el parámetro userId
+      tags:
+        - Panic Alerts
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: integer
+          description: ID del usuario para filtrar las alertas
+      responses:
+        '200':
+          description: Lista de alertas de pánico
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PanicAlert'
+
+  /panic-alerts/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID de la alerta de pánico
+
+    get:
+      summary: Obtener una alerta de pánico por ID
+      description: Retorna una alerta de pánico específica por su ID
+      tags:
+        - Panic Alerts
+      responses:
+        '200':
+          description: Alerta de pánico encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PanicAlert'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    patch:
+      summary: Actualizar una alerta de pánico
+      description: Actualiza los datos de una alerta de pánico existente
+      tags:
+        - Panic Alerts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePanicAlertDto'
+      responses:
+        '200':
+          description: Alerta de pánico actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PanicAlert'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Eliminar una alerta de pánico
+      description: Elimina una alerta de pánico del sistema
+      tags:
+        - Panic Alerts
+      responses:
+        '200':
+          description: Alerta de pánico eliminada exitosamente
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /survey-responses:
+    post:
+      summary: Crear una nueva respuesta a una encuesta
+      description: Crea una nueva respuesta a una encuesta específica
+      tags:
+        - Survey Responses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSurveyResponseDto'
+      responses:
+        '201':
+          description: Respuesta creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+    get:
+      summary: Obtener todas las respuestas a encuestas
+      description: Retorna una lista de todas las respuestas a encuestas. Se puede filtrar por encuesta o usuario usando los parámetros surveyId o userId
+      tags:
+        - Survey Responses
+      parameters:
+        - name: surveyId
+          in: query
+          schema:
+            type: integer
+          description: ID de la encuesta para filtrar las respuestas
+        - name: userId
+          in: query
+          schema:
+            type: integer
+          description: ID del usuario para filtrar las respuestas
+      responses:
+        '200':
+          description: Lista de respuestas a encuestas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SurveyResponse'
+
+  /survey-responses/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID de la respuesta a la encuesta
+
+    get:
+      summary: Obtener una respuesta a encuesta por ID
+      description: Retorna una respuesta específica a una encuesta por su ID
+      tags:
+        - Survey Responses
+      responses:
+        '200':
+          description: Respuesta encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    patch:
+      summary: Actualizar una respuesta a encuesta
+      description: Actualiza los datos de una respuesta existente
+      tags:
+        - Survey Responses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSurveyResponseDto'
+      responses:
+        '200':
+          description: Respuesta actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Eliminar una respuesta a encuesta
+      description: Elimina una respuesta a una encuesta del sistema
+      tags:
+        - Survey Responses
+      responses:
+        '200':
+          description: Respuesta eliminada exitosamente
+        '404':
+          $ref: '#/components/responses/NotFoundError' 

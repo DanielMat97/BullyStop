@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn } from 'typeorm';
 import { PanicAlert } from './panic-alerts';
 import { SurveyResponse } from './survey-response';
 
@@ -22,9 +22,14 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   emergencyContact: string;
 
+  @CreateDateColumn()
+  createdAt: Date;
+
   @OneToMany(() => PanicAlert, (alert) => alert.user)
   alerts: PanicAlert[];
 
   @OneToMany(() => SurveyResponse, (response) => response.user)
   surveyResponses: SurveyResponse[];
+
+  
 }

@@ -1,22 +1,22 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Alert } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, StyleSheet, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { router } from 'expo-router';
 import { useTheme } from '@react-navigation/native';
 import { Button } from '../../components/ui/button';
+import { API_URL } from '../../config/api';
 
 export default function ForgotPasswordScreen() {
   const { colors } = useTheme();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleResetPassword = async () => {
-    // Validate email
-    if (!email) {
+    if (!email.trim()) {
       Alert.alert('Error', 'Por favor ingresa tu correo electrónico');
       return;
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       Alert.alert('Error', 'Por favor ingresa un correo electrónico válido');
@@ -26,7 +26,7 @@ export default function ForgotPasswordScreen() {
     try {
       setLoading(true);
       // TODO: Implement API call to /users/reset-password endpoint
-      // const response = await fetch('http://localhost:3000/users/reset-password', {
+      // const response = await fetch(`${API_URL}/users/reset-password`, {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',
@@ -38,17 +38,44 @@ export default function ForgotPasswordScreen() {
       //   throw new Error('Error al enviar el correo de recuperación');
       // }
 
-      Alert.alert(
-        'Éxito',
-        'Se ha enviado un correo electrónico con las instrucciones para recuperar tu contraseña.',
-        [{ text: 'OK' }]
-      );
+      // Simulamos una respuesta exitosa
+      setTimeout(() => {
+        setLoading(false);
+        setSuccess(true);
+      }, 1500);
     } catch (error) {
-      Alert.alert('Error', 'No se pudo enviar el correo de recuperación. Por favor intenta de nuevo.');
-    } finally {
       setLoading(false);
+      Alert.alert(
+        'Error',
+        error instanceof Error 
+          ? error.message 
+          : 'Ocurrió un error al procesar tu solicitud'
+      );
     }
   };
+
+  if (success) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.content}>
+          <Text style={[styles.title, { color: colors.text }]}>
+            ¡Correo enviado!
+          </Text>
+          
+          <Text style={[styles.message, { color: colors.text }]}>
+            Se ha enviado un correo con instrucciones para restablecer tu contraseña a: {email}
+          </Text>
+          
+          <Button 
+            onPress={() => router.push('/(auth)/login')}
+            style={styles.button}
+          >
+            Volver a Inicio de Sesión
+          </Button>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -56,45 +83,43 @@ export default function ForgotPasswordScreen() {
         <Text style={[styles.title, { color: colors.text }]}>
           Recuperar Contraseña
         </Text>
-
+        
         <Text style={[styles.subtitle, { color: colors.text }]}>
-          Ingresa tu correo electrónico y te enviaremos las instrucciones para recuperar tu contraseña.
+          Ingresa tu correo electrónico para recibir instrucciones sobre cómo restablecer tu contraseña.
         </Text>
-
-        <View style={styles.form}>
-          <TextInput
-            style={[styles.input, { 
+        
+        <TextInput
+          style={[
+            styles.input, 
+            { 
               backgroundColor: colors.card,
               color: colors.text,
-              borderColor: colors.border 
-            }]}
-            placeholder="Correo electrónico"
-            placeholderTextColor={colors.text + '80'}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-
-          <Button 
-            onPress={handleResetPassword}
-            disabled={loading}
-            style={styles.button}
-          >
-            {loading ? 'Enviando...' : 'Enviar Instrucciones'}
-          </Button>
-
-          <View style={styles.loginContainer}>
-            <Text style={{ color: colors.text }}>
-              ¿Recordaste tu contraseña?{' '}
-            </Text>
-            <Link href="/(auth)/login" asChild>
-              <Text style={{ color: colors.primary, fontWeight: 'bold' }}>
-                Inicia sesión
-              </Text>
-            </Link>
-          </View>
-        </View>
+              borderColor: colors.border,
+            }
+          ]}
+          placeholder="Correo electrónico"
+          placeholderTextColor={colors.text + '80'}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+        />
+        
+        <Button
+          onPress={handleResetPassword}
+          disabled={loading}
+          style={styles.button}
+        >
+          {loading ? 'Enviando...' : 'Restablecer Contraseña'}
+        </Button>
+        
+        <Button
+          variant="outline"
+          onPress={() => router.push('/(auth)/login')}
+          style={styles.backButton}
+        >
+          Volver a Inicio de Sesión
+        </Button>
       </View>
     </View>
   );
@@ -138,5 +163,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 20,
+  },
+  message: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  backButton: {
+    marginTop: 10,
   },
 }); 
