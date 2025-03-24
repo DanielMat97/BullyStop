@@ -8,16 +8,28 @@ import {
 import { User } from './users';
 import { Survey } from './surveys';
 
+export enum SurveyResponseStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+}
+
 @Entity('survey_responses')
 export class SurveyResponse {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'json', nullable: true })
   answers: { question: string; answer: string | number }[];
 
   @CreateDateColumn()
   submittedAt: Date;
+
+  @Column({
+    type: 'enum',
+    enum: SurveyResponseStatus,
+    default: SurveyResponseStatus.PENDING,
+  })
+  status: SurveyResponseStatus;
 
   @ManyToOne(() => User, (user) => user.surveyResponses, {
     onDelete: 'CASCADE',

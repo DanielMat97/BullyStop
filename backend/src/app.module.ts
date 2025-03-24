@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './infraestructure/database/database.module';
+import { AuthModule } from './infraestructure/auth/auth.module';
 import { databaseConfig } from './infraestructure/config';
 import { UsersModule } from './application/users/users.module';
 import { SurveysModule } from './application/surveys/surveys.module';
@@ -17,6 +18,7 @@ import { SurveyResponsesModule } from './application/survey-responses/survey-res
       isGlobal: true,
     }),
     DatabaseModule,
+    AuthModule,
     UsersModule,
     SurveysModule,
     PanicAlertsModule,

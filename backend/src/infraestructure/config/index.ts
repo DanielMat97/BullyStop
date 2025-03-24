@@ -8,6 +8,11 @@ export const databaseConfig = registerAs('database', () => ({
   database: process.env.DB_DATABASE as string,
 }));
 
+export const jwtConfig = registerAs('jwt', () => ({
+  secret: process.env.JWT_SECRET as string,
+}));
+
 export const config = {
   database: databaseConfig,
+  jwt: jwtConfig,
 };

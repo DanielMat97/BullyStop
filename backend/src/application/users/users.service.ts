@@ -10,6 +10,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
@@ -17,6 +18,7 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -88,7 +90,9 @@ export class UsersService {
         email: user.email,
         name: user.name,
       },
-      token: this.jwtService.sign(payload),
+      token: this.jwtService.sign(payload, {
+        secret: this.configService.get<string>('jwt.secret'),
+      }),
     };
   }
 }

@@ -2,14 +2,14 @@ import { useContext } from 'react';
 import { AuthContext } from '../providers/AuthProvider';
 
 /**
- * Custom hook to use the auth context
- * Provides access to auth state and methods from the context
+ * Custom hook para acceder al contexto de autenticación
+ * Proporciona acceso a los estados y métodos de autenticación desde cualquier componente
  */
 export const useAuthContext = () => {
   const context = useContext(AuthContext);
   
-  if (context === null) {
-    throw new Error('useAuthContext must be used within an AuthProvider');
+  if (!context) {
+    throw new Error('useAuthContext debe ser usado dentro de un AuthProvider');
   }
   
   return context;

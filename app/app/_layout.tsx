@@ -45,6 +45,12 @@ export default function RootLayout() {
             }} 
           />
           <Stack.Screen 
+            name="survey/[id]" 
+            options={{ 
+              animation: 'slide_from_right',
+            }} 
+          />
+          <Stack.Screen 
             name="resources/about-bullying" 
             options={{ 
               animation: 'slide_from_right',
