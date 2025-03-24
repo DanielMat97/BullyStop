@@ -16,7 +16,12 @@ export class Survey {
   title: string;
 
   @Column({ type: 'json' })
-  questions: { question: string; type: string; options?: string[] }[];
+  questions: {
+    id: number;
+    question: string;
+    type: string;
+    options?: string[];
+  }[];
 
   @CreateDateColumn()
   createdAt: Date;

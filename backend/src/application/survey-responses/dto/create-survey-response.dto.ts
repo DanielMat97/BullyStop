@@ -4,7 +4,7 @@ import { Type } from 'class-transformer';
 class AnswerDto {
   @IsNumber()
   @IsNotEmpty()
-  questionId: number;
+  question: number;
 
   @IsString()
   @IsNotEmpty()

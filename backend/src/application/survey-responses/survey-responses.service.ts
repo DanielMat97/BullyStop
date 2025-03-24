@@ -27,7 +27,7 @@ export class SurveyResponsesService {
 
     // Transformar el formato de respuestas del DTO al formato de la entidad
     const formattedAnswers = createSurveyResponseDto.answers.map(a => ({
-      question: `Question ${a.questionId}`, // O idealmente obtener el texto real de la pregunta
+      question: a.question, // O idealmente obtener el texto real de la pregunta
       answer: a.answer
     }));
 

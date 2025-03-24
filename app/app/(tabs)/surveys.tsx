@@ -36,22 +36,19 @@ export default function SurveysScreen() {
 
   const handleSurveyPress = (surveyId: number, isCompleted: boolean, responseId: number | null) => {
     if (isCompleted) {
-      // Si ya está completada, podemos mostrar las respuestas o simplemente notificar
-      if (responseId) {
-        // Navegar a ver respuestas (si implementamos esa funcionalidad)
-        router.push(`/survey/${surveyId}?showResponses=true`);
-      } else {
-        Alert.alert(
-          'Encuesta Completada',
-          'Ya has completado esta encuesta. Gracias por tu participación.',
-          [{ text: 'OK' }]
-        );
-      }
+      // Si ya está completada, navegar a la pantalla de respuestas
+      router.push({
+        pathname: "/survey/[id]/responses",
+        params: { id: surveyId }
+      });
       return;
     }
 
     // Navegar a la pantalla de detalle de encuesta
-    router.push(`/survey/${surveyId}`);
+    router.push({
+      pathname: "/survey/[id]",
+      params: { id: surveyId }
+    });
   };
 
   const renderSurveyItem = ({ item }: { item: Survey }) => (

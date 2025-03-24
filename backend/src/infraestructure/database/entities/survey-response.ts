@@ -19,7 +19,7 @@ export class SurveyResponse {
   id: number;
 
   @Column({ type: 'json', nullable: true })
-  answers: { question: string; answer: string | number }[];
+  answers: { question: number; answer: string | string[] | number }[];
 
   @CreateDateColumn()
   submittedAt: Date;

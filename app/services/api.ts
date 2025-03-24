@@ -340,7 +340,7 @@ export interface Question {
 }
 
 export interface AnswerDto {
-  questionId: number;
+  question: number;
   answer: string | string[] | number | null;
 }
 
@@ -353,6 +353,7 @@ export interface CreateSurveyResponseDto {
 export interface SurveyResponse {
   id: number;
   answers: {
+    questionId: number;
     question: string;
     answer: string | string[] | number;
   }[];

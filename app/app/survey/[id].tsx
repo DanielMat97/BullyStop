@@ -13,59 +13,18 @@ import { useTheme } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams, Stack } from "expo-router";
-import { setAuthToken, surveyApi, SurveyResponse } from "../../services/api";
+import { 
+  setAuthToken, 
+  surveyApi, 
+  SurveyResponse, 
+  QuestionType, 
+  Survey, 
+  Question, 
+  AnswerDto, 
+  CreateSurveyResponseDto 
+} from "../../services/api";
 import { useAuthContext } from "../../hooks/useAuthContext";
 import { useSurveys } from "../../hooks/useSurveys";
-
-export enum QuestionType {
-  MULTIPLE_CHOICE = 'multiple_choice',
-  SINGLE_CHOICE = 'single_choice',
-  TEXT = 'text',
-  SCALE = 'scale'
-}
-
-type Question = {
-  id: number;
-  question: string;
-  type: QuestionType;
-  options?: string[];
-  required?: boolean;
-};
-
-type Survey = {
-  id: number;
-  title: string;
-  description: string;
-  questions: Question[];
-  createdAt: string;
-  userResponseStatus: string | null;
-  isCompleted: boolean;
-  isPending: boolean;
-  responseId: number | null;
-};
-
-type AnswerDto = {
-  questionId: number;
-  answer: string | string[] | number | null;
-};
-
-type CreateSurveyResponseDto = {
-  surveyId: number;
-  userId: number;
-  answers: AnswerDto[];
-};
-
-type SurveyQuestion = {
-  id: number;
-  question: string;
-  type: string;
-  options?: string[];
-};
-
-type QuestionResponse = {
-  questionIndex: number;
-  response: string | number | string[];
-};
 
 export default function SurveyDetailScreen() {
   const { colors } = useTheme();
@@ -110,46 +69,53 @@ export default function SurveyDetailScreen() {
     response: string | number | string[]
   ) => {
     setResponses((prev) => {
+      const question = currentSurvey?.questions[questionIndex];
       const existingIndex = prev.findIndex(
-        (r) => r.answers[0]?.questionId === currentSurvey?.questions[questionIndex].id
+        (r) => r.answers[0]?.questionId === question?.id
       );
+
+      const newAnswer = {
+        questionId: question?.id || 0,
+        question: question?.question || "",
+        answer: response,
+      };
 
       if (existingIndex >= 0) {
         // Update existing response
         const newResponses = [...prev];
         newResponses[existingIndex] = {
           ...prev[existingIndex],
-          answers: [
-            {
-              question: currentSurvey?.questions[questionIndex].question || "",
-              answer: response
-            }
-          ]
+          answers: [newAnswer],
         };
         return newResponses;
       } else {
         // Add new response
-        return [...prev, {
-          id: Date.now(),
-          answers: [{
-            question: currentSurvey?.questions[questionIndex].question || "",
-            answer: response
-          }],
-          status: 'PENDING',
-          createdAt: new Date().toISOString(),
-          submittedAt: new Date().toISOString(),
-          survey: currentSurvey || {
-            id: surveyId,
-            title: "",
-            questions: [],
-            createdAt: new Date().toISOString()
+        return [
+          ...prev,
+          {
+            id: Date.now(),
+            answers: [newAnswer],
+            status: "PENDING",
+            createdAt: new Date().toISOString(),
+            submittedAt: new Date().toISOString(),
+            survey: currentSurvey || {
+              id: surveyId,
+              title: "",
+              description: "",
+              questions: [],
+              createdAt: new Date().toISOString(),
+              userResponseStatus: null,
+              isCompleted: false,
+              isPending: false,
+              responseId: null,
+            },
+            user: {
+              id: user?.id || 0,
+              name: user?.name || "",
+              email: user?.email || "",
+            },
           },
-          user: {
-            id: user?.id || 0,
-            name: user?.name || "",
-            email: user?.email || ""
-          }
-        }];
+        ];
       }
     });
   };
@@ -183,15 +149,15 @@ export default function SurveyDetailScreen() {
 
     try {
       // Transform responses to match the DTO structure
-      const answers: AnswerDto[] = responses.map((response, index) => ({
-        questionId: currentSurvey.questions[index].id,
-        answer: response.answers[0].answer
+      const answers: AnswerDto[] = responses.map((response) => ({
+        question: response.answers[0].questionId,
+        answer: response.answers[0].answer,
       }));
 
       const surveyResponse: CreateSurveyResponseDto = {
         surveyId: surveyId,
         userId: user.id,
-        answers: answers
+        answers: answers,
       };
 
       const success = await submitSurveyResponse(surveyResponse);
@@ -199,7 +165,7 @@ export default function SurveyDetailScreen() {
       if (success) {
         // Actualizar la lista de encuestas
         await fetchSurveys();
-        
+
         Alert.alert(
           "Encuesta completada",
           "Gracias por completar esta encuesta. Tus respuestas han sido enviadas correctamente.",
@@ -235,7 +201,7 @@ export default function SurveyDetailScreen() {
 
   const loadResponses = async () => {
     if (!token) return;
-    
+
     setLoadingResponses(true);
     try {
       const data = await surveyApi.getSurveyResponses(surveyId, token);
@@ -252,14 +218,14 @@ export default function SurveyDetailScreen() {
     }
   };
 
-  const renderQuestion = (question: SurveyQuestion, index: number) => {
-    const currentResponse = responses.find((r) => 
-      r.answers[0]?.question === question.question
+  const renderQuestion = (question: Question, index: number) => {
+    const currentResponse = responses.find(
+      (r) => r.answers[0]?.questionId === question.id
     );
 
     // Render different question types (scale, single_choice, multiple_choice, text)
     switch (question.type) {
-      case "scale":
+      case QuestionType.SCALE:
         return (
           <View style={styles.questionContainer}>
             <Text style={[styles.questionText, { color: colors.text }]}>
@@ -307,14 +273,14 @@ export default function SurveyDetailScreen() {
           </View>
         );
 
-      case "single_choice":
+      case QuestionType.SINGLE_CHOICE:
         return (
           <View style={styles.questionContainer}>
             <Text style={[styles.questionText, { color: colors.text }]}>
               {question.question}
             </Text>
             <View style={styles.choiceContainer}>
-              {question.options?.map((option, optIndex) => (
+              {question.options?.map((option: string, optIndex: number) => (
                 <TouchableOpacity
                   key={optIndex}
                   style={[
@@ -341,17 +307,18 @@ export default function SurveyDetailScreen() {
           </View>
         );
 
-      case "multiple_choice":
+      case QuestionType.MULTIPLE_CHOICE:
         return (
           <View style={styles.questionContainer}>
             <Text style={[styles.questionText, { color: colors.text }]}>
               {question.question}
             </Text>
             <View style={styles.choiceContainer}>
-              {question.options?.map((option, optIndex) => {
-                const currentResponses = currentResponse?.answers[0].answer as string[] || [];
+              {question.options?.map((option: string, optIndex: number) => {
+                const currentResponses =
+                  (currentResponse?.answers[0].answer as string[]) || [];
                 const isSelected = currentResponses.includes(option);
-                
+
                 return (
                   <TouchableOpacity
                     key={optIndex}
@@ -368,21 +335,31 @@ export default function SurveyDetailScreen() {
                     ]}
                     onPress={() => {
                       const newResponses = isSelected
-                        ? currentResponses.filter(r => r !== option)
+                        ? currentResponses.filter((r) => r !== option)
                         : [...currentResponses, option];
                       handleResponse(index, newResponses);
                     }}
                   >
                     <View style={styles.checkboxContainer}>
-                      <View style={[
-                        styles.checkbox,
-                        {
-                          backgroundColor: isSelected ? colors.primary : colors.card,
-                          borderColor: isSelected ? colors.primary : colors.border,
-                        }
-                      ]}>
+                      <View
+                        style={[
+                          styles.checkbox,
+                          {
+                            backgroundColor: isSelected
+                              ? colors.primary
+                              : colors.card,
+                            borderColor: isSelected
+                              ? colors.primary
+                              : colors.border,
+                          },
+                        ]}
+                      >
                         {isSelected && (
-                          <MaterialCommunityIcons name="check" size={16} color="white" />
+                          <MaterialCommunityIcons
+                            name="check"
+                            size={16}
+                            color="white"
+                          />
                         )}
                       </View>
                       <Text style={[styles.choiceText, { color: colors.text }]}>
@@ -396,7 +373,7 @@ export default function SurveyDetailScreen() {
           </View>
         );
 
-      case "text":
+      case QuestionType.TEXT:
         return (
           <View style={styles.questionContainer}>
             <Text style={[styles.questionText, { color: colors.text }]}>
@@ -411,7 +388,7 @@ export default function SurveyDetailScreen() {
                   color: colors.text,
                 },
               ]}
-              value={currentResponse?.answers[0].answer as string || ""}
+              value={(currentResponse?.answers[0].answer as string) || ""}
               onChangeText={(text) => handleResponse(index, text)}
               placeholder="Escribe tu respuesta aquí..."
               placeholderTextColor={colors.text + "80"}
@@ -469,23 +446,25 @@ export default function SurveyDetailScreen() {
           <Text style={[styles.responseDate, { color: colors.text + "60" }]}>
             Respondida el {new Date(response.submittedAt).toLocaleDateString()}
           </Text>
-          <View style={[
-            styles.statusBadge,
-            {
-              backgroundColor: response.status === 'COMPLETED' 
-                ? "#4CAF5020"
-                : "#FF525220"
-            }
-          ]}>
-            <Text style={[
-              styles.statusText,
+          <View
+            style={[
+              styles.statusBadge,
               {
-                color: response.status === 'COMPLETED'
-                  ? "#4CAF50"
-                  : "#FF5252"
-              }
-            ]}>
-              {response.status === 'COMPLETED' ? 'Completada' : 'Pendiente'}
+                backgroundColor:
+                  response.status === "COMPLETED" ? "#4CAF5020" : "#FF525220",
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.statusText,
+                {
+                  color:
+                    response.status === "COMPLETED" ? "#4CAF50" : "#FF5252",
+                },
+              ]}
+            >
+              {response.status === "COMPLETED" ? "Completada" : "Pendiente"}
             </Text>
           </View>
         </View>
@@ -497,7 +476,7 @@ export default function SurveyDetailScreen() {
                 {answer.question}
               </Text>
               <Text style={[styles.answerText, { color: colors.text + "80" }]}>
-                {Array.isArray(answer.answer) 
+                {Array.isArray(answer.answer)
                   ? answer.answer.join(", ")
                   : answer.answer.toString()}
               </Text>
@@ -897,8 +876,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   checkbox: {
@@ -906,11 +885,11 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 4,
     borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   textInput: {
-    width: '100%',
+    width: "100%",
     minHeight: 100,
     padding: 12,
     borderRadius: 8,
@@ -924,9 +903,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   responseHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   responseDate: {
@@ -949,17 +928,17 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 40,
   },
   emptyText: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 12,
   },
 });
