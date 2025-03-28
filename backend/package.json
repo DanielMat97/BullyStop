@@ -18,7 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migration:surveys": "ts-node src/infraestructure/database/migrations/run-surveys-migration.ts"
+    "migration:surveys": "ts-node src/infraestructure/database/migrations/run-surveys-migration.ts",
+    "generate:repomix": "npx repomix context -i 'node_modules,dist,test'"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

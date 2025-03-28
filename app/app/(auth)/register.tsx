@@ -7,6 +7,8 @@ import {
   Alert,
   ScrollView,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Link, router } from "expo-router";
 import { useTheme } from "@react-navigation/native";
@@ -108,177 +110,196 @@ export default function RegisterScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={styles.content}>
-          <Text style={[styles.title, { color: colors.text }]}>
-            Crear una cuenta
-          </Text>
-
-          {error && <Text style={styles.errorText}>{error}</Text>}
-
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>
-              Nombre completo
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
+        <View
+          style={[styles.container, { backgroundColor: colors.background }]}
+        >
+          <View style={styles.content}>
+            <Text style={[styles.title, { color: colors.text, marginTop: 50 }]}>
+              Crear una cuenta
             </Text>
-            <TextInput
-              style={[
-                styles.input,
-                { backgroundColor: colors.card, color: colors.text },
-                formErrors.name ? styles.inputError : null,
-              ]}
-              placeholder="Ingresa tu nombre completo"
-              placeholderTextColor={colors.text + "80"}
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-            />
-            {formErrors.name && (
-              <Text style={styles.errorText}>{formErrors.name}</Text>
-            )}
-          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>
-              Correo electrónico
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                { backgroundColor: colors.card, color: colors.text },
-                formErrors.email ? styles.inputError : null,
-              ]}
-              placeholder="Ingresa tu correo electrónico"
-              placeholderTextColor={colors.text + "80"}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            {formErrors.email && (
-              <Text style={styles.errorText}>{formErrors.email}</Text>
-            )}
-          </View>
+            {error && <Text style={styles.errorText}>{error}</Text>}
 
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>
-              Contraseña
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                { backgroundColor: colors.card, color: colors.text },
-                formErrors.password ? styles.inputError : null,
-              ]}
-              placeholder="Ingresa tu contraseña"
-              placeholderTextColor={colors.text + "80"}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-            {formErrors.password && (
-              <Text style={styles.errorText}>{formErrors.password}</Text>
-            )}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>
-              Confirmar contraseña
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                { backgroundColor: colors.card, color: colors.text },
-                formErrors.confirmPassword ? styles.inputError : null,
-              ]}
-              placeholder="Confirma tu contraseña"
-              placeholderTextColor={colors.text + "80"}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-            />
-            {formErrors.confirmPassword && (
-              <Text style={styles.errorText}>{formErrors.confirmPassword}</Text>
-            )}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>
-              Grado escolar
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                { backgroundColor: colors.card, color: colors.text },
-                formErrors.grade ? styles.inputError : null,
-              ]}
-              placeholder="Ingresa tu grado escolar"
-              placeholderTextColor={colors.text + "80"}
-              value={grade}
-              onChangeText={setGrade}
-            />
-            {formErrors.grade && (
-              <Text style={styles.errorText}>{formErrors.grade}</Text>
-            )}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>
-              Contacto de emergencia (opcional)
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                { backgroundColor: colors.card, color: colors.text },
-                formErrors.emergencyContact ? styles.inputError : null,
-              ]}
-              placeholder="Ingresa tu número de contacto"
-              placeholderTextColor={colors.text + "80"}
-              value={emergencyContact}
-              onChangeText={setEmergencyContact}
-              keyboardType="phone-pad"
-            />
-            {formErrors.emergencyContact && (
-              <Text style={styles.errorText}>
-                {formErrors.emergencyContact}
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Nombre completo
               </Text>
-            )}
-          </View>
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: colors.card, color: colors.text },
+                  formErrors.name ? styles.inputError : null,
+                ]}
+                placeholder="Ingresa tu nombre completo"
+                placeholderTextColor={colors.text + "80"}
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+              />
+              {formErrors.name && (
+                <Text style={styles.errorText}>{formErrors.name}</Text>
+              )}
+            </View>
 
-          <Button
-            onPress={handleRegister}
-            disabled={isLoading}
-            style={styles.button}
-          >
-            {isLoading ? "Registrando..." : "Registrarse"}
-          </Button>
-
-          <View style={styles.footer}>
-            <View style={styles.footerText}>
-              <Text style={{ color: colors.text }}>
-                ¿Ya tienes una cuenta?{" "}
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Correo electrónico
               </Text>
-              <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
-                <Text style={{ color: colors.primary, fontWeight: "bold" }}>
-                  Inicia sesión
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: colors.card, color: colors.text },
+                  formErrors.email ? styles.inputError : null,
+                ]}
+                placeholder="Ingresa tu correo electrónico"
+                placeholderTextColor={colors.text + "80"}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              {formErrors.email && (
+                <Text style={styles.errorText}>{formErrors.email}</Text>
+              )}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Contraseña
+              </Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: colors.card, color: colors.text },
+                  formErrors.password ? styles.inputError : null,
+                ]}
+                placeholder="Ingresa tu contraseña"
+                placeholderTextColor={colors.text + "80"}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+              {formErrors.password && (
+                <Text style={styles.errorText}>{formErrors.password}</Text>
+              )}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Confirmar contraseña
+              </Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: colors.card, color: colors.text },
+                  formErrors.confirmPassword ? styles.inputError : null,
+                ]}
+                placeholder="Confirma tu contraseña"
+                placeholderTextColor={colors.text + "80"}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+              />
+              {formErrors.confirmPassword && (
+                <Text style={styles.errorText}>
+                  {formErrors.confirmPassword}
                 </Text>
-              </TouchableOpacity>
+              )}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Grado escolar
+              </Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: colors.card, color: colors.text },
+                  formErrors.grade ? styles.inputError : null,
+                ]}
+                placeholder="Ingresa tu grado escolar"
+                placeholderTextColor={colors.text + "80"}
+                value={grade}
+                onChangeText={setGrade}
+              />
+              {formErrors.grade && (
+                <Text style={styles.errorText}>{formErrors.grade}</Text>
+              )}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Contacto de emergencia (opcional)
+              </Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: colors.card, color: colors.text },
+                  formErrors.emergencyContact ? styles.inputError : null,
+                ]}
+                placeholder="Ingresa tu número de contacto"
+                placeholderTextColor={colors.text + "80"}
+                value={emergencyContact}
+                onChangeText={setEmergencyContact}
+                keyboardType="phone-pad"
+              />
+              {formErrors.emergencyContact && (
+                <Text style={styles.errorText}>
+                  {formErrors.emergencyContact}
+                </Text>
+              )}
+            </View>
+
+            <Button
+              onPress={handleRegister}
+              disabled={isLoading}
+              style={styles.button}
+            >
+              {isLoading ? "Registrando..." : "Registrarse"}
+            </Button>
+
+            <View style={styles.footer}>
+              <View style={styles.footerText}>
+                <Text style={{ color: colors.text }}>
+                  ¿Ya tienes una cuenta?{" "}
+                </Text>
+                <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
+                  <Text style={{ color: colors.primary, fontWeight: "bold" }}>
+                    Inicia sesión
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+  },
   container: {
     flex: 1,
     padding: 24,
-    justifyContent: "center",
+    paddingTop: 40,
+    paddingBottom: 40,
   },
   content: {
     width: "100%",
+    gap: 16,
   },
   title: {
     fontSize: 28,
@@ -306,10 +327,11 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   button: {
-    marginTop: 16,
+    marginTop: 24,
   },
   footer: {
     marginTop: 24,
+    marginBottom: 150,
   },
   footerText: {
     flexDirection: "row",

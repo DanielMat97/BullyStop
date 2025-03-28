@@ -3,50 +3,56 @@ import { router } from 'expo-router';
 import { useTheme } from '@react-navigation/native';
 import { Button } from '../../components/ui/button';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AuthScreen() {
   const { colors } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.content}>
-        <MaterialCommunityIcons 
-          name="shield-check" 
-          size={100} 
-          color={colors.primary}
-          style={styles.icon}
-        />
-        
-        <Text style={[styles.title, { color: colors.text }]}>
-          Bienvenido a BullyStop
-        </Text>
-        
-        <Text style={[styles.subtitle, { color: colors.text }]}>
-          Tu espacio seguro para prevenir el acoso escolar
-        </Text>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <MaterialCommunityIcons 
+            name="shield-check" 
+            size={100} 
+            color={colors.primary}
+            style={styles.icon}
+          />
+          
+          <Text style={[styles.title, { color: colors.text }]}>
+            Bienvenido a BullyStop
+          </Text>
+          
+          <Text style={[styles.subtitle, { color: colors.text }]}>
+            Tu espacio seguro para prevenir el acoso escolar
+          </Text>
 
-        <View style={styles.buttonContainer}>
-          <Button 
-            style={styles.button}
-            onPress={() => router.push('/(auth)/login')}
-          >
-            Iniciar Sesión
-          </Button>
+          <View style={styles.buttonContainer}>
+            <Button 
+              style={styles.button}
+              onPress={() => router.push('/(auth)/login')}
+            >
+              Iniciar Sesión
+            </Button>
 
-          <Button 
-            style={styles.button}
-            variant="secondary"
-            onPress={() => router.push('/(auth)/register')}
-          >
-            Registrarse
-          </Button>
+            <Button 
+              style={styles.button}
+              variant="secondary"
+              onPress={() => router.push('/(auth)/register')}
+            >
+              Registrarse
+            </Button>
+          </View>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     justifyContent: 'center',

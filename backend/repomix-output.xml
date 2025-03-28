@@ -43,25 +43,46 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
+docs/
+  openapi.yaml
+  README.md
 src/
   application/
     panic-alerts/
+      dto/
+        create-panic-alert.dto.ts
+        update-panic-alert.dto.ts
       panic-alerts.controller.ts
       panic-alerts.module.ts
       panic-alerts.service.ts
-    survey-reponse/
-      survey-reponse.controller.ts
-      survey-reponse.module.ts
-      survey-reponse.service.ts
+    survey-responses/
+      dto/
+        create-survey-response.dto.ts
+        update-survey-response.dto.ts
+      survey-responses.controller.ts
+      survey-responses.module.ts
+      survey-responses.service.ts
     surveys/
+      dto/
+        create-survey.dto.ts
+        update-survey.dto.ts
       surveys.controller.ts
       surveys.module.ts
       surveys.service.ts
     users/
+      dto/
+        create-user.dto.ts
+        update-user.dto.ts
       users.controller.ts
       users.module.ts
       users.service.ts
   infraestructure/
+    auth/
+      decorators/
+        user-id.decorator.ts
+      guards/
+        jwt-auth.guard.ts
+      auth.module.ts
     config/
       index.ts
     database/
@@ -72,6 +93,8 @@ src/
         survey-response.ts
         surveys.ts
         users.ts
+      migrations/
+        1_bullying_awareness_surveys.ts
       database.module.ts
   app.controller.spec.ts
   app.controller.ts
@@ -81,8 +104,10 @@ src/
 test/
   app.e2e-spec.ts
   jest-e2e.json
+.dockerignore
 .gitignore
 .prettierrc
+Dockerfile
 eslint.config.mjs
 nest-cli.json
 package.json
@@ -94,38 +119,935 @@ tsconfig.json
 <files>
 This section contains the contents of the repository's files.
 
+<file path="docs/openapi.yaml">
+openapi: 3.0.0
+info:
+  title: BullyStop API
+  version: 1.0.0
+  description: API para la gestión de usuarios y encuestas en BullyStop
+  contact:
+    name: DevSociety
+    email: support@bullystop.com
+
+servers:
+  - url: http://localhost:3000
+    description: Servidor de desarrollo
+  - url: https://api.bullystop.com
+    description: Servidor de producción
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID único del usuario
+        name:
+          type: string
+          description: Nombre completo del usuario
+          minLength: 3
+        email:
+          type: string
+          format: email
+          description: Correo electrónico del usuario
+        grade:
+          type: string
+          description: Grado escolar del usuario
+        emergencyContact:
+          type: string
+          description: Contacto de emergencia del usuario
+          nullable: true
+        isActive:
+          type: boolean
+          description: Estado del usuario
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación del usuario
+        updatedAt:
+          type: string
+          format: date-time
+          description: Fecha de última actualización del usuario
+      required:
+        - name
+        - email
+        - grade
+
+    CreateUserDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre completo del usuario
+          minLength: 3
+        email:
+          type: string
+          format: email
+          description: Correo electrónico del usuario
+        password:
+          type: string
+          description: Contraseña del usuario
+          minLength: 6
+        grade:
+          type: string
+          description: Grado escolar del usuario
+        emergencyContact:
+          type: string
+          description: Contacto de emergencia del usuario
+      required:
+        - name
+        - email
+        - password
+        - grade
+
+    UpdateUserDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre completo del usuario
+          minLength: 3
+        email:
+          type: string
+          format: email
+          description: Correo electrónico del usuario
+        password:
+          type: string
+          description: Nueva contraseña del usuario
+          minLength: 6
+        grade:
+          type: string
+          description: Grado escolar del usuario
+        emergencyContact:
+          type: string
+          description: Contacto de emergencia del usuario
+
+    QuestionType:
+      type: string
+      enum:
+        - multiple_choice
+        - single_choice
+        - text
+        - scale
+      description: Tipo de pregunta en la encuesta
+
+    Question:
+      type: object
+      properties:
+        question:
+          type: string
+          description: Texto de la pregunta
+        type:
+          $ref: '#/components/schemas/QuestionType'
+        options:
+          type: array
+          items:
+            type: string
+          description: Opciones disponibles para preguntas de selección
+      required:
+        - question
+        - type
+
+    Survey:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID único de la encuesta
+        title:
+          type: string
+          description: Título de la encuesta
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+          description: Lista de preguntas de la encuesta
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación de la encuesta
+        responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyResponse'
+          description: Respuestas a la encuesta
+      required:
+        - title
+        - questions
+
+    CreateSurveyDto:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Título de la encuesta
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+          minItems: 1
+          description: Lista de preguntas de la encuesta
+      required:
+        - title
+        - questions
+
+    UpdateSurveyDto:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Título de la encuesta
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+          minItems: 1
+          description: Lista de preguntas de la encuesta
+
+    SurveyResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID único de la respuesta
+        surveyId:
+          type: integer
+          description: ID de la encuesta respondida
+        userId:
+          type: integer
+          description: ID del usuario que respondió
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: integer
+                description: ID de la pregunta
+              answer:
+                type: string
+                description: Respuesta proporcionada
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de la respuesta
+        survey:
+          $ref: '#/components/schemas/Survey'
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+        - surveyId
+        - userId
+        - answers
+
+    CreateSurveyResponseDto:
+      type: object
+      properties:
+        surveyId:
+          type: integer
+          description: ID de la encuesta a responder
+        userId:
+          type: integer
+          description: ID del usuario que responde
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: integer
+                description: ID de la pregunta
+              answer:
+                type: string
+                description: Respuesta proporcionada
+          minItems: 1
+      required:
+        - surveyId
+        - userId
+        - answers
+
+    UpdateSurveyResponseDto:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: integer
+                description: ID de la pregunta
+              answer:
+                type: string
+                description: Respuesta proporcionada
+          minItems: 1
+
+    PanicAlert:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID único de la alerta
+        latitude:
+          type: number
+          format: float
+          description: Latitud de la ubicación de la alerta
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: float
+          description: Longitud de la ubicación de la alerta
+          minimum: -180
+          maximum: 180
+        timestamp:
+          type: string
+          format: date-time
+          description: Fecha y hora de la alerta
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+        - latitude
+        - longitude
+        - userId
+
+    CreatePanicAlertDto:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: float
+          description: Latitud de la ubicación de la alerta
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: float
+          description: Longitud de la ubicación de la alerta
+          minimum: -180
+          maximum: 180
+        userId:
+          type: integer
+          description: ID del usuario que envía la alerta
+      required:
+        - latitude
+        - longitude
+        - userId
+
+    UpdatePanicAlertDto:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: float
+          description: Latitud de la ubicación de la alerta
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: float
+          description: Longitud de la ubicación de la alerta
+          minimum: -180
+          maximum: 180
+
+  responses:
+    NotFoundError:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                example: 404
+              message:
+                type: string
+                example: Resource not found
+              error:
+                type: string
+                example: Not Found
+
+    ValidationError:
+      description: Error de validación
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                example: 400
+              message:
+                type: array
+                items:
+                  type: string
+                example: ["Invalid input data"]
+              error:
+                type: string
+                example: Bad Request
+
+paths:
+  /users:
+    post:
+      summary: Crear un nuevo usuario
+      description: Crea un nuevo usuario en el sistema
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserDto'
+      responses:
+        '201':
+          description: Usuario creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+    get:
+      summary: Obtener todos los usuarios
+      description: Retorna una lista de todos los usuarios registrados
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID del usuario
+
+    get:
+      summary: Obtener un usuario por ID
+      description: Retorna un usuario específico por su ID
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    patch:
+      summary: Actualizar un usuario
+      description: Actualiza los datos de un usuario existente
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserDto'
+      responses:
+        '200':
+          description: Usuario actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Eliminar un usuario
+      description: Elimina un usuario del sistema
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Usuario eliminado exitosamente
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /surveys:
+    post:
+      summary: Crear una nueva encuesta
+      description: Crea una nueva encuesta en el sistema
+      tags:
+        - Surveys
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSurveyDto'
+      responses:
+        '201':
+          description: Encuesta creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Survey'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+    get:
+      summary: Obtener todas las encuestas
+      description: Retorna una lista de todas las encuestas disponibles
+      tags:
+        - Surveys
+      responses:
+        '200':
+          description: Lista de encuestas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Survey'
+
+  /surveys/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID de la encuesta
+
+    get:
+      summary: Obtener una encuesta por ID
+      description: Retorna una encuesta específica por su ID
+      tags:
+        - Surveys
+      responses:
+        '200':
+          description: Encuesta encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Survey'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    patch:
+      summary: Actualizar una encuesta
+      description: Actualiza los datos de una encuesta existente
+      tags:
+        - Surveys
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSurveyDto'
+      responses:
+        '200':
+          description: Encuesta actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Survey'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Eliminar una encuesta
+      description: Elimina una encuesta del sistema
+      tags:
+        - Surveys
+      responses:
+        '200':
+          description: Encuesta eliminada exitosamente
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /panic-alerts:
+    post:
+      summary: Crear una nueva alerta de pánico
+      description: Crea una nueva alerta de pánico con la ubicación del usuario
+      tags:
+        - Panic Alerts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePanicAlertDto'
+      responses:
+        '201':
+          description: Alerta de pánico creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PanicAlert'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+    get:
+      summary: Obtener todas las alertas de pánico
+      description: Retorna una lista de todas las alertas de pánico. Se puede filtrar por usuario usando el parámetro userId
+      tags:
+        - Panic Alerts
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: integer
+          description: ID del usuario para filtrar las alertas
+      responses:
+        '200':
+          description: Lista de alertas de pánico
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PanicAlert'
+
+  /panic-alerts/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID de la alerta de pánico
+
+    get:
+      summary: Obtener una alerta de pánico por ID
+      description: Retorna una alerta de pánico específica por su ID
+      tags:
+        - Panic Alerts
+      responses:
+        '200':
+          description: Alerta de pánico encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PanicAlert'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    patch:
+      summary: Actualizar una alerta de pánico
+      description: Actualiza los datos de una alerta de pánico existente
+      tags:
+        - Panic Alerts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePanicAlertDto'
+      responses:
+        '200':
+          description: Alerta de pánico actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PanicAlert'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Eliminar una alerta de pánico
+      description: Elimina una alerta de pánico del sistema
+      tags:
+        - Panic Alerts
+      responses:
+        '200':
+          description: Alerta de pánico eliminada exitosamente
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /survey-responses:
+    post:
+      summary: Crear una nueva respuesta a una encuesta
+      description: Crea una nueva respuesta a una encuesta específica
+      tags:
+        - Survey Responses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSurveyResponseDto'
+      responses:
+        '201':
+          description: Respuesta creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+    get:
+      summary: Obtener todas las respuestas a encuestas
+      description: Retorna una lista de todas las respuestas a encuestas. Se puede filtrar por encuesta o usuario usando los parámetros surveyId o userId
+      tags:
+        - Survey Responses
+      parameters:
+        - name: surveyId
+          in: query
+          schema:
+            type: integer
+          description: ID de la encuesta para filtrar las respuestas
+        - name: userId
+          in: query
+          schema:
+            type: integer
+          description: ID del usuario para filtrar las respuestas
+      responses:
+        '200':
+          description: Lista de respuestas a encuestas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SurveyResponse'
+
+  /survey-responses/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID de la respuesta a la encuesta
+
+    get:
+      summary: Obtener una respuesta a encuesta por ID
+      description: Retorna una respuesta específica a una encuesta por su ID
+      tags:
+        - Survey Responses
+      responses:
+        '200':
+          description: Respuesta encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    patch:
+      summary: Actualizar una respuesta a encuesta
+      description: Actualiza los datos de una respuesta existente
+      tags:
+        - Survey Responses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSurveyResponseDto'
+      responses:
+        '200':
+          description: Respuesta actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Eliminar una respuesta a encuesta
+      description: Elimina una respuesta a una encuesta del sistema
+      tags:
+        - Survey Responses
+      responses:
+        '200':
+          description: Respuesta eliminada exitosamente
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+</file>
+
+<file path="docs/README.md">
+# Documentación de la API BullyStop
+
+Este directorio contiene la documentación de la API de BullyStop en formato OpenAPI (Swagger).
+
+## Archivos
+
+- `openapi.yaml`: Documentación completa de la API en formato OpenAPI 3.0.0
+
+## Importación en ApiDog
+
+Para importar esta documentación en ApiDog:
+
+1. Inicia sesión en tu cuenta de ApiDog
+2. Ve a la sección de APIs
+3. Haz clic en "Import API"
+4. Selecciona "OpenAPI (Swagger)"
+5. Sube el archivo `openapi.yaml` o pega su contenido
+6. Configura las variables de entorno si es necesario
+7. Haz clic en "Import"
+
+## Endpoints Documentados
+
+### Usuarios
+
+- `POST /users`: Crear un nuevo usuario
+- `GET /users`: Obtener todos los usuarios
+- `GET /users/{id}`: Obtener un usuario por ID
+- `PATCH /users/{id}`: Actualizar un usuario
+- `DELETE /users/{id}`: Eliminar un usuario
+
+### Encuestas
+
+- `POST /surveys`: Crear una nueva encuesta
+- `GET /surveys`: Obtener todas las encuestas
+- `GET /surveys/{id}`: Obtener una encuesta por ID
+- `PATCH /surveys/{id}`: Actualizar una encuesta
+- `DELETE /surveys/{id}`: Eliminar una encuesta
+
+#### Tipos de Preguntas
+
+Las encuestas soportan los siguientes tipos de preguntas:
+- `multiple_choice`: Preguntas de selección múltiple
+- `single_choice`: Preguntas de selección única
+- `text`: Preguntas de texto libre
+- `scale`: Preguntas de escala
+
+### Respuestas a Encuestas
+
+- `POST /survey-responses`: Crear una nueva respuesta a una encuesta
+- `GET /survey-responses`: Obtener todas las respuestas (con filtro opcional por encuesta o usuario)
+- `GET /survey-responses/{id}`: Obtener una respuesta específica por ID
+- `PATCH /survey-responses/{id}`: Actualizar una respuesta
+- `DELETE /survey-responses/{id}`: Eliminar una respuesta
+
+#### Estructura de Respuestas
+
+Cada respuesta incluye:
+- `surveyId`: ID de la encuesta respondida
+- `userId`: ID del usuario que respondió
+- `answers`: Array de respuestas, cada una con:
+  - `questionId`: ID de la pregunta
+  - `answer`: Respuesta proporcionada
+
+### Alertas de Pánico
+
+- `POST /panic-alerts`: Crear una nueva alerta de pánico
+- `GET /panic-alerts`: Obtener todas las alertas de pánico (con filtro opcional por usuario)
+- `GET /panic-alerts/{id}`: Obtener una alerta de pánico por ID
+- `PATCH /panic-alerts/{id}`: Actualizar una alerta de pánico
+- `DELETE /panic-alerts/{id}`: Eliminar una alerta de pánico
+
+#### Parámetros de Ubicación
+
+Las alertas de pánico incluyen coordenadas geográficas:
+- `latitude`: Latitud (-90 a 90)
+- `longitude`: Longitud (-180 a 180)
+
+## Actualización de la Documentación
+
+La documentación se actualiza manualmente cuando se realizan cambios en la API. Para mantener la documentación actualizada:
+
+1. Actualiza el archivo `openapi.yaml` con los cambios necesarios
+2. Verifica que la sintaxis YAML sea correcta
+3. Importa la nueva versión en ApiDog
+
+## Validación
+
+Puedes validar la documentación OpenAPI usando herramientas como:
+- [Swagger Editor](https://editor.swagger.io/)
+- [OpenAPI.Tools](https://openapi.tools/)
+</file>
+
+<file path="src/application/panic-alerts/dto/create-panic-alert.dto.ts">
+import { IsNumber, IsNotEmpty, Min, Max } from 'class-validator';
+
+export class CreatePanicAlertDto {
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(-90)
+  @Max(90)
+  latitude: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(-180)
+  @Max(180)
+  longitude: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  userId: number;
+}
+</file>
+
+<file path="src/application/panic-alerts/dto/update-panic-alert.dto.ts">
+import { PartialType } from '@nestjs/mapped-types';
+import { CreatePanicAlertDto } from './create-panic-alert.dto';
+
+export class UpdatePanicAlertDto extends PartialType(CreatePanicAlertDto) {}
+</file>
+
 <file path="src/application/panic-alerts/panic-alerts.controller.ts">
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { PanicAlertsService } from './panic-alerts.service';
 import { CreatePanicAlertDto } from './dto/create-panic-alert.dto';
 import { UpdatePanicAlertDto } from './dto/update-panic-alert.dto';
+import { PanicAlert } from '../../infraestructure/database/entities/panic-alerts';
 
 @Controller('panic-alerts')
 export class PanicAlertsController {
   constructor(private readonly panicAlertsService: PanicAlertsService) {}
 
   @Post()
-  create(@Body() createPanicAlertDto: CreatePanicAlertDto) {
+  create(@Body() createPanicAlertDto: CreatePanicAlertDto): Promise<PanicAlert> {
     return this.panicAlertsService.create(createPanicAlertDto);
   }
 
   @Get()
-  findAll() {
+  findAll(@Query('userId') userId?: string): Promise<PanicAlert[]> {
+    if (userId) {
+      return this.panicAlertsService.findByUser(+userId);
+    }
     return this.panicAlertsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Promise<PanicAlert> {
     return this.panicAlertsService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePanicAlertDto: UpdatePanicAlertDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updatePanicAlertDto: UpdatePanicAlertDto,
+  ): Promise<PanicAlert> {
     return this.panicAlertsService.update(+id, updatePanicAlertDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string): Promise<void> {
     return this.panicAlertsService.remove(+id);
   }
 }
@@ -133,155 +1055,464 @@ export class PanicAlertsController {
 
 <file path="src/application/panic-alerts/panic-alerts.module.ts">
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { PanicAlertsService } from './panic-alerts.service';
 import { PanicAlertsController } from './panic-alerts.controller';
+import { PanicAlert } from '../../infraestructure/database/entities/panic-alerts';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([PanicAlert])],
   controllers: [PanicAlertsController],
   providers: [PanicAlertsService],
+  exports: [PanicAlertsService],
 })
 export class PanicAlertsModule {}
 </file>
 
 <file path="src/application/panic-alerts/panic-alerts.service.ts">
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { PanicAlert } from '../../infraestructure/database/entities/panic-alerts';
 import { CreatePanicAlertDto } from './dto/create-panic-alert.dto';
 import { UpdatePanicAlertDto } from './dto/update-panic-alert.dto';
 
 @Injectable()
 export class PanicAlertsService {
-  create(createPanicAlertDto: CreatePanicAlertDto) {
-    return 'This action adds a new panicAlert';
+  constructor(
+    @InjectRepository(PanicAlert)
+    private readonly panicAlertRepository: Repository<PanicAlert>,
+  ) {}
+
+  async create(createPanicAlertDto: CreatePanicAlertDto): Promise<PanicAlert> {
+    const panicAlert = this.panicAlertRepository.create({
+      latitude: createPanicAlertDto.latitude,
+      longitude: createPanicAlertDto.longitude,
+      user: { id: createPanicAlertDto.userId },
+    });
+    return this.panicAlertRepository.save(panicAlert);
   }
 
-  findAll() {
-    return `This action returns all panicAlerts`;
+  async findAll(): Promise<PanicAlert[]> {
+    return this.panicAlertRepository.find({
+      relations: ['user'],
+      order: {
+        timestamp: 'DESC',
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} panicAlert`;
+  async findOne(id: number): Promise<PanicAlert> {
+    const panicAlert = await this.panicAlertRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+    if (!panicAlert) {
+      throw new NotFoundException(`Panic alert with ID ${id} not found`);
+    }
+    return panicAlert;
   }
 
-  update(id: number, updatePanicAlertDto: UpdatePanicAlertDto) {
-    return `This action updates a #${id} panicAlert`;
+  async findByUser(userId: number): Promise<PanicAlert[]> {
+    return this.panicAlertRepository.find({
+      where: { user: { id: userId } },
+      relations: ['user'],
+      order: {
+        timestamp: 'DESC',
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} panicAlert`;
+  async update(id: number, updatePanicAlertDto: UpdatePanicAlertDto): Promise<PanicAlert> {
+    const panicAlert = await this.findOne(id);
+    Object.assign(panicAlert, updatePanicAlertDto);
+    return this.panicAlertRepository.save(panicAlert);
+  }
+
+  async remove(id: number): Promise<void> {
+    const result = await this.panicAlertRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Panic alert with ID ${id} not found`);
+    }
   }
 }
 </file>
 
-<file path="src/application/survey-reponse/survey-reponse.controller.ts">
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { SurveyReponseService } from './survey-reponse.service';
-import { CreateSurveyReponseDto } from './dto/create-survey-reponse.dto';
-import { UpdateSurveyReponseDto } from './dto/update-survey-reponse.dto';
+<file path="src/application/survey-responses/dto/create-survey-response.dto.ts">
+import { IsNumber, IsNotEmpty, IsArray, ValidateNested, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 
-@Controller('survey-reponse')
-export class SurveyReponseController {
-  constructor(private readonly surveyReponseService: SurveyReponseService) {}
+class AnswerDto {
+  @IsNumber()
+  @IsNotEmpty()
+  question: number;
 
+  @IsString()
+  @IsNotEmpty()
+  answer: string;
+}
+
+export class CreateSurveyResponseDto {
+  @IsNumber()
+  @IsNotEmpty()
+  surveyId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  userId: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AnswerDto)
+  answers: AnswerDto[];
+}
+</file>
+
+<file path="src/application/survey-responses/dto/update-survey-response.dto.ts">
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateSurveyResponseDto } from './create-survey-response.dto';
+
+export class UpdateSurveyResponseDto extends PartialType(CreateSurveyResponseDto) {}
+</file>
+
+<file path="src/application/survey-responses/survey-responses.controller.ts">
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { SurveyResponsesService } from './survey-responses.service';
+import { CreateSurveyResponseDto } from './dto/create-survey-response.dto';
+import { UpdateSurveyResponseDto } from './dto/update-survey-response.dto';
+import { SurveyResponse } from 'src/infraestructure/database/entities/survey-response';
+import { JwtAuthGuard } from '../../infraestructure/auth/guards/jwt-auth.guard';
+import { UserId } from '../../infraestructure/auth/decorators/user-id.decorator';
+
+@Controller('survey-responses')
+export class SurveyResponsesController {
+  constructor(private readonly surveyResponsesService: SurveyResponsesService) {}
+
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createSurveyReponseDto: CreateSurveyReponseDto) {
-    return this.surveyReponseService.create(createSurveyReponseDto);
+  create(
+    @Body() createSurveyResponseDto: CreateSurveyResponseDto,
+    @UserId() userId: number
+  ): Promise<SurveyResponse> {
+    createSurveyResponseDto.userId = userId;
+    return this.surveyResponsesService.create(createSurveyResponseDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.surveyReponseService.findAll();
+  findAll(
+    @UserId() userId: number,
+    @Query('surveyId') surveyId?: string,
+  ): Promise<SurveyResponse[]> {
+    if (surveyId) {
+      return this.surveyResponsesService.findBySurvey(+surveyId);
+    }
+    return this.surveyResponsesService.findByUser(userId);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('survey/:surveyId/user')
+  findBySurveyAndUser(
+    @Param('surveyId') surveyId: string,
+    @UserId() userId: number,
+  ): Promise<SurveyResponse[]> {
+    return this.surveyResponsesService.findBySurveyAndUser(+surveyId, userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.surveyReponseService.findOne(+id);
+  findOne(@Param('id') id: string): Promise<SurveyResponse> {
+    return this.surveyResponsesService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSurveyReponseDto: UpdateSurveyReponseDto) {
-    return this.surveyReponseService.update(+id, updateSurveyReponseDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateSurveyResponseDto: UpdateSurveyResponseDto,
+  ): Promise<SurveyResponse> {
+    return this.surveyResponsesService.update(+id, updateSurveyResponseDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.surveyReponseService.remove(+id);
+  remove(@Param('id') id: string): Promise<void> {
+    return this.surveyResponsesService.remove(+id);
   }
 }
 </file>
 
-<file path="src/application/survey-reponse/survey-reponse.module.ts">
+<file path="src/application/survey-responses/survey-responses.module.ts">
 import { Module } from '@nestjs/common';
-import { SurveyReponseService } from './survey-reponse.service';
-import { SurveyReponseController } from './survey-reponse.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { SurveyResponsesService } from './survey-responses.service';
+import { SurveyResponsesController } from './survey-responses.controller';
+import { SurveyResponse } from 'src/infraestructure/database/entities/survey-response';
+import { AuthModule } from '../../infraestructure/auth/auth.module';
 
 @Module({
-  controllers: [SurveyReponseController],
-  providers: [SurveyReponseService],
+  imports: [
+    TypeOrmModule.forFeature([SurveyResponse]),
+    AuthModule,
+  ],
+  controllers: [SurveyResponsesController],
+  providers: [SurveyResponsesService],
+  exports: [SurveyResponsesService],
 })
-export class SurveyReponseModule {}
+export class SurveyResponsesModule {}
 </file>
 
-<file path="src/application/survey-reponse/survey-reponse.service.ts">
-import { Injectable } from '@nestjs/common';
-import { CreateSurveyReponseDto } from './dto/create-survey-reponse.dto';
-import { UpdateSurveyReponseDto } from './dto/update-survey-reponse.dto';
+<file path="src/application/survey-responses/survey-responses.service.ts">
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { SurveyResponse, SurveyResponseStatus } from 'src/infraestructure/database/entities/survey-response';
+import { CreateSurveyResponseDto } from './dto/create-survey-response.dto';
+import { UpdateSurveyResponseDto } from './dto/update-survey-response.dto';
 
 @Injectable()
-export class SurveyReponseService {
-  create(createSurveyReponseDto: CreateSurveyReponseDto) {
-    return 'This action adds a new surveyReponse';
+export class SurveyResponsesService {
+  constructor(
+    @InjectRepository(SurveyResponse)
+    private readonly surveyResponseRepository: Repository<SurveyResponse>,
+  ) {}
+
+  async create(
+    createSurveyResponseDto: CreateSurveyResponseDto,
+  ): Promise<SurveyResponse> {
+    // Buscar si existe una respuesta pendiente para este usuario y encuesta
+    const existingResponse = await this.surveyResponseRepository.findOne({
+      where: {
+        survey: { id: createSurveyResponseDto.surveyId },
+        user: { id: createSurveyResponseDto.userId },
+        status: SurveyResponseStatus.PENDING
+      },
+      relations: ['survey', 'user']
+    });
+
+    // Transformar el formato de respuestas del DTO al formato de la entidad
+    const formattedAnswers = createSurveyResponseDto.answers.map(a => ({
+      question: a.question, // O idealmente obtener el texto real de la pregunta
+      answer: a.answer
+    }));
+
+    if (existingResponse) {
+      // Actualizar la respuesta pendiente existente
+      existingResponse.answers = formattedAnswers;
+      existingResponse.status = SurveyResponseStatus.COMPLETED;
+      // submittedAt se actualizará automáticamente
+      return this.surveyResponseRepository.save(existingResponse);
+    }
+
+    // Si no existe una respuesta pendiente, crear una nueva con estado COMPLETED directamente
+    console.log('No se encontró una respuesta pendiente, creando una nueva con estado COMPLETED');
+    const surveyResponse = this.surveyResponseRepository.create();
+    surveyResponse.survey = { id: createSurveyResponseDto.surveyId } as any;
+    surveyResponse.user = { id: createSurveyResponseDto.userId } as any;
+    surveyResponse.answers = formattedAnswers;
+    surveyResponse.status = SurveyResponseStatus.COMPLETED;
+    
+    return this.surveyResponseRepository.save(surveyResponse);
   }
 
-  findAll() {
-    return `This action returns all surveyReponse`;
+  async findAll(): Promise<SurveyResponse[]> {
+    return this.surveyResponseRepository.find({
+      relations: ['survey', 'user'],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} surveyReponse`;
+  async findOne(id: number): Promise<SurveyResponse> {
+    const surveyResponse = await this.surveyResponseRepository.findOne({
+      where: { id },
+      relations: ['survey', 'user'],
+    });
+    if (!surveyResponse) {
+      throw new NotFoundException(`Survey response with ID ${id} not found`);
+    }
+    return surveyResponse;
   }
 
-  update(id: number, updateSurveyReponseDto: UpdateSurveyReponseDto) {
-    return `This action updates a #${id} surveyReponse`;
+  async findBySurvey(surveyId: number): Promise<SurveyResponse[]> {
+    return this.surveyResponseRepository.find({
+      where: { survey: { id: surveyId } },
+      relations: ['survey', 'user'],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} surveyReponse`;
+  async findByUser(userId: number): Promise<SurveyResponse[]> {
+    return this.surveyResponseRepository.find({
+      where: { user: { id: userId } },
+      relations: ['survey', 'user'],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+  async findBySurveyAndUser(surveyId: number, userId: number): Promise<SurveyResponse[]> {
+    return this.surveyResponseRepository.find({
+      where: { 
+        survey: { id: surveyId },
+        user: { id: userId }
+      },
+      relations: ['survey', 'user'],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+  async update(
+    id: number,
+    updateSurveyResponseDto: UpdateSurveyResponseDto,
+  ): Promise<SurveyResponse> {
+    const surveyResponse = await this.findOne(id);
+    Object.assign(surveyResponse, updateSurveyResponseDto);
+    return this.surveyResponseRepository.save(surveyResponse);
+  }
+
+  async remove(id: number): Promise<void> {
+    const result = await this.surveyResponseRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Survey response with ID ${id} not found`);
+    }
   }
 }
+</file>
+
+<file path="src/application/surveys/dto/create-survey.dto.ts">
+import { IsString, IsArray, IsNotEmpty, ValidateNested, ArrayMinSize, IsEnum, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export enum QuestionType {
+  MULTIPLE_CHOICE = 'multiple_choice',
+  SINGLE_CHOICE = 'single_choice',
+  TEXT = 'text',
+  SCALE = 'scale'
+}
+
+export class QuestionDto {
+  @IsString()
+  @IsNotEmpty()
+  question: string;
+
+  @IsEnum(QuestionType)
+  type: QuestionType;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  options?: string[];
+}
+
+export class CreateSurveyDto {
+  @IsString()
+  @IsNotEmpty()
+  title: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @ArrayMinSize(1)
+  @Type(() => QuestionDto)
+  questions: QuestionDto[];
+}
+</file>
+
+<file path="src/application/surveys/dto/update-survey.dto.ts">
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateSurveyDto } from './create-survey.dto';
+
+export class UpdateSurveyDto extends PartialType(CreateSurveyDto) {}
 </file>
 
 <file path="src/application/surveys/surveys.controller.ts">
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { SurveysService } from './surveys.service';
 import { CreateSurveyDto } from './dto/create-survey.dto';
 import { UpdateSurveyDto } from './dto/update-survey.dto';
+import { Survey } from '../../infraestructure/database/entities/surveys';
+import { JwtAuthGuard } from '../../infraestructure/auth/guards/jwt-auth.guard';
+import { UserId } from '../../infraestructure/auth/decorators/user-id.decorator';
+import { SurveyResponsesService } from '../survey-responses/survey-responses.service';
+import { SurveyResponseStatus } from '../../infraestructure/database/entities/survey-response';
 
 @Controller('surveys')
 export class SurveysController {
-  constructor(private readonly surveysService: SurveysService) {}
+  constructor(
+    private readonly surveysService: SurveysService,
+    private readonly surveyResponsesService: SurveyResponsesService,
+  ) {}
 
   @Post()
-  create(@Body() createSurveyDto: CreateSurveyDto) {
+  create(@Body() createSurveyDto: CreateSurveyDto): Promise<Survey> {
     return this.surveysService.create(createSurveyDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.surveysService.findAll();
+  async findAll(@UserId() userId: number): Promise<any[]> {
+    const surveys = await this.surveysService.findAll();
+    
+    // Para cada encuesta, verificar si el usuario ya la respondió
+    const surveyWithResponseStatus = await Promise.all(
+      surveys.map(async (survey) => {
+        // Buscar todas las respuestas del usuario para esta encuesta
+        const userResponses = await this.surveyResponsesService.findBySurvey(survey.id);
+        
+        // Verificar si hay alguna respuesta del usuario actual y su estado
+        const userResponse = userResponses.find(
+          response => response.user && response.user.id === userId
+        );
+        
+        return {
+          ...survey,
+          userResponseStatus: userResponse ? userResponse.status : null,
+          isCompleted: userResponse ? userResponse.status === SurveyResponseStatus.COMPLETED : false,
+          isPending: userResponse ? userResponse.status === SurveyResponseStatus.PENDING : false,
+          responseId: userResponse ? userResponse.id : null
+        };
+      })
+    );
+    
+    return surveyWithResponseStatus;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.surveysService.findOne(+id);
+  async findOne(@Param('id') id: string, @UserId() userId: number): Promise<any> {
+    const survey = await this.surveysService.findOne(+id);
+    
+    // Buscar la respuesta del usuario para esta encuesta
+    const userResponses = await this.surveyResponsesService.findBySurvey(+id);
+    const userResponse = userResponses.find(
+      response => response.user && response.user.id === userId
+    );
+    
+    return {
+      ...survey,
+      userResponseStatus: userResponse ? userResponse.status : null,
+      isCompleted: userResponse ? userResponse.status === SurveyResponseStatus.COMPLETED : false,
+      isPending: userResponse ? userResponse.status === SurveyResponseStatus.PENDING : false,
+      responseId: userResponse ? userResponse.id : null
+    };
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSurveyDto: UpdateSurveyDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateSurveyDto: UpdateSurveyDto,
+  ): Promise<Survey> {
     return this.surveysService.update(+id, updateSurveyDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string): Promise<void> {
     return this.surveysService.remove(+id);
   }
 }
@@ -289,50 +1520,153 @@ export class SurveysController {
 
 <file path="src/application/surveys/surveys.module.ts">
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
 import { SurveysService } from './surveys.service';
 import { SurveysController } from './surveys.controller';
+import { Survey } from '../../infraestructure/database/entities/surveys';
+import { SurveyResponse } from '../../infraestructure/database/entities/survey-response';
+import { UsersModule } from '../users/users.module';
+import { SurveyResponsesModule } from '../survey-responses/survey-responses.module';
+import { AuthModule } from '../../infraestructure/auth/auth.module';
 
 @Module({
+  imports: [
+    TypeOrmModule.forFeature([Survey, SurveyResponse]),
+    UsersModule,
+    SurveyResponsesModule,
+    AuthModule,
+  ],
   controllers: [SurveysController],
   providers: [SurveysService],
+  exports: [SurveysService],
 })
 export class SurveysModule {}
 </file>
 
 <file path="src/application/surveys/surveys.service.ts">
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Survey } from '../../infraestructure/database/entities/surveys';
 import { CreateSurveyDto } from './dto/create-survey.dto';
 import { UpdateSurveyDto } from './dto/update-survey.dto';
+import { UsersService } from '../users/users.service';
+import { SurveyResponse, SurveyResponseStatus } from '../../infraestructure/database/entities/survey-response';
 
 @Injectable()
 export class SurveysService {
-  create(createSurveyDto: CreateSurveyDto) {
-    return 'This action adds a new survey';
+  constructor(
+    @InjectRepository(Survey)
+    private readonly surveyRepository: Repository<Survey>,
+    @InjectRepository(SurveyResponse)
+    private readonly surveyResponseRepository: Repository<SurveyResponse>,
+    private readonly usersService: UsersService,
+  ) {}
+
+  async create(createSurveyDto: CreateSurveyDto): Promise<Survey> {
+    // Crear la encuesta
+    const survey = this.surveyRepository.create(createSurveyDto);
+    const savedSurvey = await this.surveyRepository.save(survey);
+    
+    // Obtener todos los usuarios
+    const users = await this.usersService.findAll();
+    
+    // Crear una respuesta pendiente para cada usuario
+    for (const user of users) {
+      const pendingResponse = this.surveyResponseRepository.create();
+      pendingResponse.survey = savedSurvey;
+      pendingResponse.user = user;
+      pendingResponse.status = SurveyResponseStatus.PENDING;
+      // Guardar la respuesta pendiente
+      await this.surveyResponseRepository.save(pendingResponse);
+    }
+    
+    return savedSurvey;
   }
 
-  findAll() {
-    return `This action returns all surveys`;
+  async findAll(): Promise<Survey[]> {
+    return this.surveyRepository.find({
+      relations: ['responses'],
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} survey`;
+  async findOne(id: number): Promise<Survey> {
+    const survey = await this.surveyRepository.findOne({
+      where: { id },
+      relations: ['responses'],
+    });
+    if (!survey) {
+      throw new NotFoundException(`Survey with ID ${id} not found`);
+    }
+    return survey;
   }
 
-  update(id: number, updateSurveyDto: UpdateSurveyDto) {
-    return `This action updates a #${id} survey`;
+  async update(id: number, updateSurveyDto: UpdateSurveyDto): Promise<Survey> {
+    const survey = await this.findOne(id);
+    Object.assign(survey, updateSurveyDto);
+    return this.surveyRepository.save(survey);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} survey`;
+  async remove(id: number): Promise<void> {
+    const result = await this.surveyRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Survey with ID ${id} not found`);
+    }
   }
 }
 </file>
 
+<file path="src/application/users/dto/create-user.dto.ts">
+import { IsString, IsEmail, IsNotEmpty, MinLength, IsOptional } from 'class-validator';
+
+export class CreateUserDto {
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  name: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
+  password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  grade: string;
+
+  @IsString()
+  @IsOptional()
+  emergencyContact?: string;
+}
+</file>
+
+<file path="src/application/users/dto/update-user.dto.ts">
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateUserDto } from './create-user.dto';
+
+export class UpdateUserDto extends PartialType(CreateUserDto) {}
+</file>
+
 <file path="src/application/users/users.controller.ts">
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from '../../infraestructure/database/entities/users';
 
 @Controller('users')
 export class UsersController {
@@ -343,23 +1677,38 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @Post('login')
+  async login(@Body() credentials: { email: string; password: string }) {
+    try {
+      return await this.usersService.login(
+        credentials.email,
+        credentials.password,
+      );
+    } catch (error) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+  }
+
   @Get()
-  findAll() {
+  findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Promise<User> {
     return this.usersService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<User> {
     return this.usersService.update(+id, updateUserDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string): Promise<void> {
     return this.usersService.remove(+id);
   }
 }
@@ -367,43 +1716,219 @@ export class UsersController {
 
 <file path="src/application/users/users.module.ts">
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
+import { User } from '../../infraestructure/database/entities/users';
+import { config } from '../../infraestructure/config';
 
 @Module({
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    ConfigModule.forFeature(config.jwt),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('jwt.secret'),
+        signOptions: { expiresIn: '24h' },
+      }),
+      inject: [ConfigService],
+    }),
+  ],
   controllers: [UsersController],
   providers: [UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}
 </file>
 
 <file path="src/application/users/users.service.ts">
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../../infraestructure/database/entities/users';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
+
+  async create(createUserDto: CreateUserDto) {
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const user = this.userRepository.create({
+      ...createUserDto,
+      passwordHash: hashedPassword,
+    });
+    await this.userRepository.save(user);
+    return this.login(user.email, createUserDto.password);
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll(): Promise<User[]> {
+    return this.userRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(id);
+
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    Object.assign(user, updateUserDto);
+    return this.userRepository.save(user);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number): Promise<void> {
+    const result = await this.userRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { email } });
+  }
+
+  async login(email: string, password: string) {
+    const user = await this.findByEmail(email);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      name: user.name,
+    };
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+      token: this.jwtService.sign(payload, {
+        secret: this.configService.get<string>('jwt.secret'),
+      }),
+    };
   }
 }
+</file>
+
+<file path="src/infraestructure/auth/decorators/user-id.decorator.ts">
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+
+export const UserId = createParamDecorator(
+  (data: unknown, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest();
+    return request.userId;
+  },
+);
+</file>
+
+<file path="src/infraestructure/auth/guards/jwt-auth.guard.ts">
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
+import { ConfigService } from '@nestjs/config';
+
+@Injectable()
+export class JwtAuthGuard implements CanActivate {
+  constructor(
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const token = this.extractTokenFromHeader(request);
+
+    if (!token) {
+      throw new UnauthorizedException('Token no proporcionado');
+    }
+
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>('jwt.secret'),
+      });
+
+      // Añadir el payload decodificado y el userId al objeto request
+      request['user'] = payload;
+      request['userId'] = payload.sub;
+
+      return true;
+    } catch (error) {
+      throw new UnauthorizedException('Token inválido');
+    }
+  }
+
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const accessToken: string | undefined = (request.headers.authorization ||
+      request.headers.Authorization) as any;
+    const [type, token] = accessToken?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
+  }
+}
+</file>
+
+<file path="src/infraestructure/auth/auth.module.ts">
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { config } from '../config';
+
+@Module({
+  imports: [
+    ConfigModule.forFeature(config.jwt),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('jwt.secret'),
+        signOptions: { expiresIn: '24h' },
+      }),
+    }),
+  ],
+  providers: [JwtAuthGuard],
+  exports: [JwtModule, JwtAuthGuard],
+})
+export class AuthModule {}
 </file>
 
 <file path="src/infraestructure/config/index.ts">
@@ -417,8 +1942,13 @@ export const databaseConfig = registerAs('database', () => ({
   database: process.env.DB_DATABASE as string,
 }));
 
+export const jwtConfig = registerAs('jwt', () => ({
+  secret: process.env.JWT_SECRET as string,
+}));
+
 export const config = {
   database: databaseConfig,
+  jwt: jwtConfig,
 };
 </file>
 
@@ -440,7 +1970,7 @@ export const databaseProviders = [
         password: configService.get('database.password'),
         database: configService.get('database.database'),
         entities,
-        synchronize: false,
+        synchronize: true,
       });
 
       return dataSource.initialize();
@@ -490,16 +2020,28 @@ import {
 import { User } from './users';
 import { Survey } from './surveys';
 
+export enum SurveyResponseStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+}
+
 @Entity('survey_responses')
 export class SurveyResponse {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'json' })
-  answers: { question: string; answer: string | number }[];
+  @Column({ type: 'json', nullable: true })
+  answers: { question: number; answer: string | string[] | number }[];
 
   @CreateDateColumn()
   submittedAt: Date;
+
+  @Column({
+    type: 'enum',
+    enum: SurveyResponseStatus,
+    default: SurveyResponseStatus.PENDING,
+  })
+  status: SurveyResponseStatus;
 
   @ManyToOne(() => User, (user) => user.surveyResponses, {
     onDelete: 'CASCADE',
@@ -510,6 +2052,9 @@ export class SurveyResponse {
     onDelete: 'CASCADE',
   })
   survey: Survey;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }
 </file>
 
@@ -532,7 +2077,12 @@ export class Survey {
   title: string;
 
   @Column({ type: 'json' })
-  questions: { question: string; type: string; options?: string[] }[];
+  questions: {
+    id: number;
+    question: string;
+    type: string;
+    options?: string[];
+  }[];
 
   @CreateDateColumn()
   createdAt: Date;
@@ -543,7 +2093,7 @@ export class Survey {
 </file>
 
 <file path="src/infraestructure/database/entities/users.ts">
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn } from 'typeorm';
 import { PanicAlert } from './panic-alerts';
 import { SurveyResponse } from './survey-response';
 
@@ -567,11 +2117,227 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   emergencyContact: string;
 
+  @CreateDateColumn()
+  createdAt: Date;
+
   @OneToMany(() => PanicAlert, (alert) => alert.user)
   alerts: PanicAlert[];
 
   @OneToMany(() => SurveyResponse, (response) => response.user)
   surveyResponses: SurveyResponse[];
+}
+</file>
+
+<file path="src/infraestructure/database/migrations/1_bullying_awareness_surveys.ts">
+import { MigrationInterface, QueryRunner } from 'typeorm';
+import { Survey } from '../entities/surveys';
+import { QuestionType } from '../../../application/surveys/dto/create-survey.dto';
+
+export class BullyingAwarenessSurveys1710428400000 implements MigrationInterface {
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    const surveyRepository = queryRunner.manager.getRepository(Survey);
+
+    // Encuesta 1: Identificación de Bullying
+    const identificationSurvey = surveyRepository.create({
+      title: 'Reconocimiento y Detección de Bullying',
+      questions: [
+        {
+          id: 1,
+          question: '¿Alguna vez has sido testigo de situaciones donde alguien es excluido deliberadamente de actividades grupales?',
+          type: QuestionType.SINGLE_CHOICE,
+          options: ['Nunca', 'Rara vez', 'Algunas veces', 'Frecuentemente', 'Muy frecuentemente']
+        },
+        {
+          id: 2,
+          question: '¿Has notado a compañeros que son objeto de burlas constantes o apodos ofensivos?',
+          type: QuestionType.SINGLE_CHOICE,
+          options: ['Nunca', 'Rara vez', 'Algunas veces', 'Frecuentemente', 'Muy frecuentemente']
+        },
+        {
+          id: 3,
+          question: '¿Has observado situaciones donde alguien es intimidado físicamente (empujones, golpes)?',
+          type: QuestionType.SINGLE_CHOICE,
+          options: ['Nunca', 'Rara vez', 'Algunas veces', 'Frecuentemente', 'Muy frecuentemente']
+        },
+        {
+          id: 4,
+          question: '¿Has visto a compañeros que difunden rumores o comentarios negativos sobre otros?',
+          type: QuestionType.SINGLE_CHOICE,
+          options: ['Nunca', 'Rara vez', 'Algunas veces', 'Frecuentemente', 'Muy frecuentemente']
+        },
+        {
+          id: 5,
+          question: '¿Qué comportamientos consideras que constituyen bullying? (Selecciona todos los que apliquen)',
+          type: QuestionType.MULTIPLE_CHOICE,
+          options: [
+            'Bromas ocasionales entre amigos', 
+            'Exclusión sistemática de actividades', 
+            'Insultos o apodos constantes', 
+            'Agresión física', 
+            'Difusión de rumores',
+            'Cyberbullying (acoso en redes sociales)',
+            'Daño a pertenencias personales'
+          ]
+        }
+      ]
+    });
+
+    // Encuesta 2: Evaluación de Clima Escolar
+    const schoolClimateSurvey = surveyRepository.create({
+      title: 'Evaluación del Ambiente Escolar',
+      questions: [
+        {
+          id: 1,
+          question: '¿Te sientes seguro/a en tu escuela?',
+          type: QuestionType.SCALE,
+          options: ['1 - Nada seguro', '2', '3', '4', '5 - Completamente seguro']
+        },
+        {
+          id: 2,
+          question: '¿Cómo calificarías la actitud de los profesores frente a situaciones de conflicto entre estudiantes?',
+          type: QuestionType.SCALE,
+          options: ['1 - Muy mala', '2', '3', '4', '5 - Excelente']
+        },
+        {
+          id: 3,
+          question: '¿En tu escuela existen mecanismos claros para reportar situaciones de bullying?',
+          type: QuestionType.SINGLE_CHOICE,
+          options: ['Sí, y son efectivos', 'Sí, pero no son efectivos', 'No existen', 'No estoy seguro/a']
+        },
+        {
+          id: 4,
+          question: '¿Qué tan frecuentes son las actividades de prevención de bullying en tu escuela?',
+          type: QuestionType.SINGLE_CHOICE,
+          options: ['Nunca se realizan', 'Una vez al año', 'Una vez por semestre', 'Mensualmente', 'Semanalmente']
+        },
+        {
+          id: 5,
+          question: '¿Qué sugerencias tienes para mejorar el ambiente escolar y prevenir el bullying?',
+          type: QuestionType.TEXT
+        }
+      ]
+    });
+
+    // Encuesta 3: Experiencias Personales
+    const personalExperienceSurvey = surveyRepository.create({
+      title: 'Experiencias Personales con el Bullying',
+      questions: [
+        {
+          id: 1,
+          question: '¿Has experimentado alguna forma de bullying en los últimos 6 meses?',
+          type: QuestionType.SINGLE_CHOICE,
+          options: ['Nunca', 'Una o dos veces', 'Mensualmente', 'Semanalmente', 'Diariamente']
+        },
+        {
+          id: 2,
+          question: 'Si has experimentado bullying, ¿de qué tipo ha sido principalmente?',
+          type: QuestionType.MULTIPLE_CHOICE,
+          options: ['Verbal', 'Físico', 'Social (exclusión)', 'Cibernético', 'No he experimentado bullying']
+        },
+        {
+          id: 3,
+          question: '¿Has buscado ayuda cuando te has sentido acosado/a o has visto a alguien siendo acosado?',
+          type: QuestionType.SINGLE_CHOICE,
+          options: ['Siempre', 'A veces', 'Rara vez', 'Nunca', 'No aplica']
+        },
+        {
+          id: 4,
+          question: '¿A quién acudirías si experimentaras o presenciaras una situación de bullying?',
+          type: QuestionType.MULTIPLE_CHOICE,
+          options: ['Padres', 'Profesores', 'Consejero escolar', 'Amigos', 'Directivos escolares', 'Línea de ayuda', 'Nadie']
+        },
+        {
+          id: 5,
+          question: 'Describe una situación donde te hayas sentido intimidado o hayas visto a alguien siendo intimidado. ¿Cómo se manejó?',
+          type: QuestionType.TEXT
+        }
+      ]
+    });
+
+    // Encuesta 4: Estrategias de Intervención
+    const interventionStrategiesSurvey = surveyRepository.create({
+      title: 'Estrategias para Intervenir en Situaciones de Bullying',
+      questions: [
+        {
+          id: 1,
+          question: '¿Qué harías si vieras a un compañero siendo acosado?',
+          type: QuestionType.MULTIPLE_CHOICE,
+          options: [
+            'Intervenir directamente', 
+            'Buscar ayuda de un adulto', 
+            'Ofrecer apoyo a la víctima después', 
+            'Ignorar la situación',
+            'Unirme al grupo para no ser excluido'
+          ]
+        },
+        {
+          id: 2,
+          question: '¿Qué estrategias consideras más efectivas para detener el bullying?',
+          type: QuestionType.MULTIPLE_CHOICE,
+          options: [
+            'Educación y concientización', 
+            'Sanciones severas para agresores', 
+            'Programas de mediación entre pares', 
+            'Mayor supervisión de adultos',
+            'Desarrollo de habilidades sociales y emocionales'
+          ]
+        },
+        {
+          id: 3,
+          question: '¿Te sientes preparado/a para intervenir si ves una situación de bullying?',
+          type: QuestionType.SCALE,
+          options: ['1 - Nada preparado', '2', '3', '4', '5 - Completamente preparado']
+        },
+        {
+          id: 4,
+          question: '¿Cuáles crees que son las consecuencias más graves del bullying?',
+          type: QuestionType.MULTIPLE_CHOICE,
+          options: [
+            'Bajo rendimiento académico', 
+            'Problemas de autoestima', 
+            'Depresión y ansiedad', 
+            'Pensamientos suicidas',
+            'Problemas de integración social',
+            'Abandono escolar'
+          ]
+        },
+        {
+          id: 5,
+          question: '¿Qué recursos o herramientas necesitarías para sentirte más seguro interviniendo en situaciones de bullying?',
+          type: QuestionType.TEXT
+        }
+      ]
+    });
+
+    // Guardar las encuestas en la base de datos
+    await surveyRepository.save([
+      identificationSurvey,
+      schoolClimateSurvey,
+      personalExperienceSurvey,
+      interventionStrategiesSurvey
+    ]);
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    const surveyRepository = queryRunner.manager.getRepository(Survey);
+    
+    // Eliminar las encuestas por título
+    await surveyRepository.delete({
+      title: 'Reconocimiento y Detección de Bullying'
+    });
+    
+    await surveyRepository.delete({
+      title: 'Evaluación del Ambiente Escolar'
+    });
+    
+    await surveyRepository.delete({
+      title: 'Experiencias Personales con el Bullying'
+    });
+    
+    await surveyRepository.delete({
+      title: 'Estrategias para Intervenir en Situaciones de Bullying'
+    });
+  }
 }
 </file>
 
@@ -653,11 +2419,12 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './infraestructure/database/database.module';
+import { AuthModule } from './infraestructure/auth/auth.module';
 import { databaseConfig } from './infraestructure/config';
 import { UsersModule } from './application/users/users.module';
 import { SurveysModule } from './application/surveys/surveys.module';
 import { PanicAlertsModule } from './application/panic-alerts/panic-alerts.module';
-import { SurveyReponseModule } from './application/survey-reponse/survey-reponse.module';
+import { SurveyResponsesModule } from './application/survey-responses/survey-responses.module';
 
 @Module({
   imports: [
@@ -666,10 +2433,11 @@ import { SurveyReponseModule } from './application/survey-reponse/survey-reponse
       isGlobal: true,
     }),
     DatabaseModule,
+    AuthModule,
     UsersModule,
     SurveysModule,
     PanicAlertsModule,
-    SurveyReponseModule,
+    SurveyResponsesModule
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -691,10 +2459,37 @@ export class AppService {
 <file path="src/main.ts">
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+  
+  // Habilitar CORS para todos los orígenes
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    credentials: true,
+  });
+  
+  // Agregar middleware de registro para peticiones HTTP
+  app.use((req, res, next) => {
+    const logger = new Logger('HTTP');
+    const startTime = Date.now();
+    
+    res.on('finish', () => {
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+      logger.log(
+        `${req.method} ${req.originalUrl} ${res.statusCode} - ${duration}ms | IP: ${req.ip}`
+      );
+    });
+    
+    next();
+  });
+  
+  await app.listen(3000);
 }
 bootstrap();
 </file>
@@ -737,6 +2532,45 @@ describe('AppController (e2e)', () => {
     "^.+\\.(t|j)s$": "ts-jest"
   }
 }
+</file>
+
+<file path=".dockerignore">
+# Dependencias
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Control de versiones
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Testing
+coverage
+.nyc_output
+
+# Build
+dist
+build
+
+# Environment
+.env
+.env.*
+!.env.example
 </file>
 
 <file path=".gitignore">
@@ -803,6 +2637,45 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
   "singleQuote": true,
   "trailingComma": "all"
 }
+</file>
+
+<file path="Dockerfile">
+# Etapa de construcción
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copiar archivos de dependencias
+COPY package*.json ./
+
+# Instalar dependencias
+RUN npm ci
+
+# Copiar el código fuente
+COPY . .
+
+# Construir la aplicación
+RUN npm run build
+
+# Etapa de producción
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiar archivos de dependencias
+COPY package*.json ./
+
+# Instalar solo las dependencias de producción
+RUN npm ci --only=production
+
+# Copiar los archivos construidos desde la etapa anterior
+COPY --from=builder /app/dist ./dist
+
+# Exponer el puerto
+EXPOSE 3000
+
+# Comando para ejecutar la aplicación
+CMD ["npm", "run", "start:prod"]
 </file>
 
 <file path="eslint.config.mjs">
@@ -874,14 +2747,21 @@ export default tseslint.config(
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "migration:surveys": "ts-node src/infraestructure/database/migrations/run-surveys-migration.ts",
+    "generate:repomix": "npx repomix context -i 'node_modules,dist,test'"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.1",
     "@nestjs/core": "^11.0.1",
-    "@nestjs/mapped-types": "*",
+    "@nestjs/jwt": "^11.0.0",
+    "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/typeorm": "^11.0.0",
+    "bcrypt": "^5.1.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
     "pg": "^8.14.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",

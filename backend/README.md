@@ -1,98 +1,200 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# BullyStop - Backend API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Descripción General
+BullyStop es una plataforma integral diseñada para prevenir, detectar y gestionar casos de bullying en entornos educativos. El sistema proporciona herramientas para la recolección de datos, seguimiento de incidentes y respuesta rápida ante situaciones de acoso escolar.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Características en Detalle
 
-## Description
+### Funcionales u Operativas
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+#### Funcionamiento
+- **Sistema de Usuarios**: Registro y autenticación de estudiantes y personal educativo
+- **Encuestas de Evaluación**: Sistema de encuestas para monitorear el ambiente escolar
+- **Alertas de Pánico**: Sistema de respuesta rápida para situaciones de emergencia
+- **Seguimiento de Casos**: Registro y monitoreo de incidentes reportados
 
-## Project setup
+#### Seguridad
+- Autenticación JWT con tokens de 24 horas
+- Encriptación de contraseñas con bcrypt
+- Guards de autenticación en rutas protegidas
+- Validación de datos con class-validator
+- CORS configurado para entornos seguros
 
-```bash
-$ npm install
-```
+#### Mantenimiento y Manipulación de Datos
+- Logs detallados de todas las operaciones
+- Monitoreo de duración de peticiones
+- Registro de IPs para auditoría
+- Backups automáticos en Railway
 
-## Compile and run the project
+#### Transporte de Datos
+- API RESTful con OpenAPI/Swagger
+- Comunicación segura mediante HTTPS
+- Validación de DTOs en todas las operaciones
+- Manejo de errores estandarizado
 
-```bash
-# development
-$ npm run start
+### Productivas o de Desarrollo
 
-# watch mode
-$ npm run start:dev
+#### Método de Desarrollo
+- Arquitectura Hexagonal/Clean Architecture
+- Desarrollo basado en módulos de NestJS
+- Principios SOLID y DRY
+- Testing unitario y e2e
 
-# production mode
-$ npm run start:prod
-```
+#### Estándares Aplicados
+- ESLint para calidad de código
+- Prettier para formateo consistente
+- TypeScript strict mode
+- Convenciones de NestJS
 
-## Run tests
+#### Tecnologías Utilizadas
+- NestJS como framework principal
+- TypeORM para persistencia de datos
+- PostgreSQL como base de datos
+- Docker para containerización
 
-```bash
-# unit tests
-$ npm run test
+#### Control de Calidad
+- Tests automatizados
+- Code reviews obligatorios
+- CI/CD en Railway
+- Linting y formatting automático
 
-# e2e tests
-$ npm run test:e2e
+### Comunicativos
 
-# test coverage
-$ npm run test:cov
-```
+#### Estilo y Comunicación
+- API documentada con OpenAPI/Swagger
+- Mensajes de error descriptivos
+- Logs detallados para debugging
+- Documentación técnica completa
 
-## Deployment
+### Recursos
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+#### Infraestructura
+- Railway para hosting
+- PostgreSQL en Railway
+- CI/CD automatizado
+- Monitoreo y logs centralizados
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+#### Presupuesto y Tecnología
+- Hosting en Railway (Plan Pro)
+- Dominio personalizado
+- Certificados SSL
+- Herramientas de desarrollo
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
+### Mercado
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+#### Análisis del Sector
+El software responde a la creciente necesidad de herramientas digitales para combatir el bullying escolar, un problema que afecta a millones de estudiantes globalmente.
 
-## Resources
+## Tipo de Prototipo
 
-Check out a few resources that may come in handy when working with NestJS:
+### Naturaleza del Prototipo
+- **Tipo**: Intangible (Software/Servicio Digital)
+- **Propósito**: Proporcionar una plataforma integral para la prevención y gestión del bullying escolar
+- **Impacto**: Mejora la seguridad y bienestar de los estudiantes mediante detección temprana y respuesta rápida
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Materiales/Recursos Necesarios
 
-## Support
+### Desarrollo
+- Node.js v20 o superior
+- PostgreSQL 15+
+- Docker y Docker Compose
+- IDE (recomendado: VS Code)
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Dependencias Principales
+\`\`\`json
+{
+  "@nestjs/common": "^11.0.1",
+  "@nestjs/config": "^4.0.1",
+  "@nestjs/jwt": "^11.0.0",
+  "@nestjs/typeorm": "^11.0.0",
+  "bcrypt": "^5.1.1",
+  "class-validator": "^0.14.1",
+  "pg": "^8.14.1",
+  "typeorm": "^0.3.21"
+}
+\`\`\`
 
-## Stay in touch
+## Técnicas de Elaboración
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Metodología de Desarrollo
+- Metodología Ágil (Scrum)
+- Sprints de 2 semanas
+- Code reviews
+- Integración continua
 
-## License
+### Stack Tecnológico
+- **Backend**: NestJS, TypeScript, PostgreSQL
+- **ORM**: TypeORM
+- **Testing**: Jest
+- **Documentación**: OpenAPI/Swagger
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Técnicas de Usabilidad
+- Validación de datos en tiempo real
+- Respuestas HTTP estandarizadas
+- Rate limiting
+- Caché de consultas frecuentes
+
+## Escala
+
+### Alcance del Proyecto
+- **Fase Actual**: Prototipo de Alta Fidelidad
+- **Escala**: Nacional (España)
+- **Usuarios Objetivo**: Instituciones educativas
+- **Capacidad**: Diseñado para manejar múltiples instituciones simultáneamente
+
+## Nivel de Fidelidad
+
+### Características del Prototipo
+- **Nivel**: Alta Fidelidad
+- **Justificación**: El sistema está completamente funcional y listo para producción, con todas las características principales implementadas y probadas.
+
+### Componentes de Alta Fidelidad
+1. Sistema de autenticación completo
+2. CRUD de usuarios y encuestas
+3. Sistema de alertas de pánico
+4. Análisis de respuestas
+5. Logging y monitoreo
+
+## Instalación y Configuración
+
+### Requisitos Previos
+\`\`\`bash
+# Node.js v20+
+# PostgreSQL 15+
+# Docker (opcional)
+\`\`\`
+
+### Configuración del Entorno
+1. Clonar el repositorio
+2. Copiar .env.example a .env
+3. Configurar variables de entorno
+4. Instalar dependencias:
+   \`\`\`bash
+   npm install
+   \`\`\`
+
+### Ejecución
+\`\`\`bash
+# Desarrollo
+npm run start:dev
+
+# Producción
+npm run build
+npm run start:prod
+
+# Docker
+docker-compose up -d
+\`\`\`
+
+## Contribución
+1. Fork el repositorio
+2. Crear una rama feature
+3. Commit los cambios
+4. Push a la rama
+5. Crear Pull Request
+
+## Licencia
+Este proyecto está bajo la Licencia MIT.
+
+## Contacto
+DevSociety - daniel@devsociety.co
