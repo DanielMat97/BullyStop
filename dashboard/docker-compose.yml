@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  metabase:
+    build: .
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
+    container_name: metabase
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./metabase-data:/metabase-data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+volumes:
+  postgres-data:
+    name: bullystop-postgres-data 

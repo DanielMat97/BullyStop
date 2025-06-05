@@ -1,0 +1,18 @@
+# Environment variables
+.env
+
+# Metabase data
+metabase-data/
+
+# Docker volumes
+postgres-data/
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.swo
+
+# Logs
+*.log 
