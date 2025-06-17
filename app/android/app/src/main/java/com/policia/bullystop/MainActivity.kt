@@ -1,4 +1,4 @@
-package com.policia.bullystop
+package com.policia.SITAB
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

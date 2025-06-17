@@ -1,16 +1,16 @@
 openapi: 3.0.0
 info:
-  title: BullyStop API
+  title: SITAB API
   version: 1.0.0
-  description: API para la gestión de usuarios y encuestas en BullyStop
+  description: API para la gestión de usuarios y encuestas en SITAB
   contact:
     name: DevSociety
-    email: support@bullystop.com
+    email: support@SITAB.com
 
 servers:
   - url: http://localhost:3000
     description: Servidor de desarrollo
-  - url: https://api.bullystop.com
+  - url: https://api.SITAB.com
     description: Servidor de producción
 
 components:

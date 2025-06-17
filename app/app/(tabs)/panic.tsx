@@ -37,19 +37,19 @@ export default function PanicScreen() {
       if (permissionGranted) {
         updateLocation();
       } else {
-        setLocationError('Se requiere permiso de ubicación para enviar alertas precisas');
+        setLocationError('Se requieren permisos de ubicación para triangulación táctica');
         
         // Preguntar al usuario si desea habilitarlos
         Alert.alert(
-          'Permisos de Ubicación',
-          'Esta función requiere acceso a tu ubicación para enviar alertas precisas.',
+          'Autorización de Ubicación',
+          'El protocolo SITAB requiere geolocalización para triangulación efectiva.',
           [
             {
-              text: 'Volver a intentar',
+              text: 'Autorizar',
               onPress: () => checkLocationPermission(),
             },
             {
-              text: 'Ir a Configuración',
+              text: 'Configurar',
               onPress: () => openSettings(),
             },
             {
@@ -62,7 +62,7 @@ export default function PanicScreen() {
       }
     } catch (error) {
       console.error('Error al verificar permisos de ubicación:', error);
-      setLocationError('No se pudo verificar los permisos de ubicación');
+      setLocationError('No se pudo verificar autorización de ubicación');
     }
   };
 
@@ -84,13 +84,13 @@ export default function PanicScreen() {
       setLocation(currentLocation);
       return currentLocation;
     } catch (error) {
-      console.error('Error al obtener la ubicación:', error);
-      setLocationError('No se pudo obtener tu ubicación actual');
+      console.error('Error en triangulación:', error);
+      setLocationError('No se pudo establecer triangulación actual');
       return null;
     }
   };
 
-  // Animación del botón de pánico
+  // Animación del botón de alerta
   const animateButton = () => {
     Animated.sequence([
       Animated.timing(buttonScale, {
@@ -106,10 +106,10 @@ export default function PanicScreen() {
     ]).start();
   };
 
-  // Función principal para enviar alerta de pánico
-  const handlePanicPress = async () => {
+  // Función principal para activar alerta táctica
+  const handleTacticalAlert = async () => {
     if (!user || !token) {
-      Alert.alert('Error', 'Debes iniciar sesión para usar esta función');
+      Alert.alert('Error de Autenticación', 'Debe identificarse para activar protocolo SITAB');
       return;
     }
 
@@ -123,25 +123,25 @@ export default function PanicScreen() {
         
         // Ofrecer opciones al usuario para habilitar permisos
         Alert.alert(
-          'Permisos de Ubicación',
-          'Esta función requiere acceso a tu ubicación para enviar alertas precisas.',
+          'Autorización de Ubicación',
+          'El protocolo SITAB requiere geolocalización para triangulación efectiva.',
           [
             {
-              text: 'Aceptar Permisos',
+              text: 'Autorizar',
               onPress: async () => {
                 // Verificar los permisos y obtener el resultado directamente
                 const { status } = await Location.requestForegroundPermissionsAsync();
                 if (status === 'granted') {
                   setIsLocationPermissionGranted(true);
-                  // Intentar de nuevo enviar la alerta si se otorgaron los permisos
-                  handlePanicPress();
+                  // Intentar de nuevo activar la alerta si se otorgaron los permisos
+                  handleTacticalAlert();
                 } else {
                   Alert.alert(
-                    'Permisos Denegados',
-                    'No se puede enviar la alerta sin acceso a tu ubicación.',
+                    'Autorización Denegada',
+                    'No se puede activar alerta sin triangulación.',
                     [
                       {
-                        text: 'Ir a Configuración',
+                        text: 'Configurar',
                         onPress: () => openSettings(),
                       },
                       {
@@ -154,7 +154,7 @@ export default function PanicScreen() {
               },
             },
             {
-              text: 'Ir a Configuración',
+              text: 'Configurar',
               onPress: () => openSettings(),
             },
             {
@@ -171,7 +171,7 @@ export default function PanicScreen() {
       const currentLocation = await updateLocation();
       
       if (!currentLocation) {
-        throw new Error('No se pudo obtener tu ubicación actual');
+        throw new Error('No se pudo establecer triangulación para el protocolo');
       }
 
       // Preparar los datos de la alerta según el DTO esperado
@@ -181,143 +181,201 @@ export default function PanicScreen() {
         userId: user.id,
       };
 
-      console.log('Enviando alerta de pánico:', alertData);
+      console.log('Activando alerta táctica SITAB:', alertData);
 
       // Enviar alerta usando el servicio de API
       const response = await panicAlertApi.sendPanicAlert(alertData, token);
 
-      console.log('Respuesta del servidor:', response);
+      console.log('Respuesta del comando:', response);
       
       // Mostrar confirmación y opciones
       Alert.alert(
-        'Alerta Enviada',
-        'Se ha notificado a las autoridades y contactos de emergencia.',
+        'Alerta Táctica Activada',
+        'Protocolo SITAB iniciado. Unidades notificadas.',
         [
           {
-            text: 'Llamar a Emergencias',
+            text: 'Contactar Comando',
             onPress: () => callEmergencyServices(),
           },
           {
-            text: 'OK',
-            style: 'cancel',
+            text: 'Comunicar Institución',
+            onPress: () => contactSchool(),
+          },
+          {
+            text: 'Entendido',
+            style: 'default',
           },
         ]
       );
     } catch (error) {
-      console.error('Error al enviar alerta de pánico:', error);
+      console.error('Error en protocolo SITAB:', error);
       Alert.alert(
-        'Error',
-        'No se pudo enviar la alerta. Por favor intenta de nuevo o contacta directamente a emergencias.',
-        [
-          {
-            text: 'Llamar a Emergencias',
-            onPress: () => callEmergencyServices(),
-          },
-          {
-            text: 'OK',
-            style: 'cancel',
-          },
-        ]
+        'Error en Protocolo',
+        `No se pudo activar alerta táctica: ${error instanceof Error ? error.message : 'Error del sistema'}`
       );
     } finally {
       setLoading(false);
     }
   };
 
-  // Función para llamar a servicios de emergencia
   const callEmergencyServices = () => {
-    const emergencyNumber = EMERGENCY_NUMBERS.GENERAL;
-    makePhoneCall(emergencyNumber, 'servicios de emergencia');
+    makePhoneCall(EMERGENCY_NUMBERS.GENERAL, 'Comando de Emergencias');
   };
 
-  // Función para contactar a la escuela
   const contactSchool = () => {
-    const schoolNumber = EMERGENCY_NUMBERS.SCHOOL;
-    makePhoneCall(schoolNumber, 'la escuela');
+    makePhoneCall(EMERGENCY_NUMBERS.SCHOOL, 'Comando Institucional');
   };
 
-  // Función reutilizable para realizar llamadas
   const makePhoneCall = (phoneNumber: string, destination: string) => {
-    const url = `tel:${phoneNumber}`;
+    const phoneURL = `tel:${phoneNumber}`;
     
-    Linking.canOpenURL(url)
+    Linking.canOpenURL(phoneURL)
       .then((supported) => {
         if (supported) {
-          return Linking.openURL(url);
+          Linking.openURL(phoneURL);
         } else {
-          Alert.alert('Error', `No se puede realizar llamadas a ${phoneNumber}`);
+          Alert.alert(
+            'Error de Comunicación',
+            `No se puede contactar ${destination}. Número: ${phoneNumber}`
+          );
         }
       })
-      .catch((err) => {
-        console.error(`Error al intentar llamar a ${destination}:`, err);
-        Alert.alert('Error', `No se pudo iniciar la llamada a ${destination}`);
+      .catch((error) => {
+        console.error('Error al intentar llamar:', error);
+        Alert.alert(
+          'Error del Sistema',
+          'No se pudo establecer comunicación telefónica'
+        );
       });
   };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.content}>
-        <Text style={[styles.title, { color: colors.text }]}>
-          Botón de Pánico
-        </Text>
-        
-        <Text style={[styles.subtitle, { color: colors.text + '80' }]}>
-          Presiona el botón si necesitas ayuda inmediata
-        </Text>
+        <View style={styles.header}>
+          <MaterialCommunityIcons
+            name="shield-alert"
+            size={80}
+            color={colors.primary}
+            style={styles.headerIcon}
+          />
+          <Text style={[styles.title, { color: colors.text }]}>
+            Alerta Táctica SITAB
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.text + '80' }]}>
+            🛡️ Preparación Táctica - Protocolo de Emergencia
+          </Text>
+        </View>
+
+        <View style={styles.statusContainer}>
+          <View style={[styles.statusCard, { backgroundColor: colors.card }]}>
+            <MaterialCommunityIcons
+              name="map-marker"
+              size={24}
+              color={isLocationPermissionGranted ? '#388E3C' : '#FFC107'}
+            />
+            <Text style={[styles.statusText, { color: colors.text }]}>
+              Triangulación: {isLocationPermissionGranted ? 'Operativa' : 'Pendiente'}
+            </Text>
+          </View>
+          
+          <View style={[styles.statusCard, { backgroundColor: colors.card }]}>
+            <MaterialCommunityIcons
+              name="account-check"
+              size={24}
+              color={user ? '#388E3C' : '#D32F2F'}
+            />
+            <Text style={[styles.statusText, { color: colors.text }]}>
+              Identificación: {user ? 'Verificada' : 'Requerida'}
+            </Text>
+          </View>
+        </View>
 
         {locationError && (
-          <Text style={[styles.locationError, { color: '#FF3B30' }]}>
-            ⚠️ {locationError}
-          </Text>
+          <View style={[styles.errorContainer, { backgroundColor: '#FFC107' + '20' }]}>
+            <MaterialCommunityIcons
+              name="alert-octagon"
+              size={20}
+              color="#FFC107"
+            />
+            <Text style={[styles.errorText, { color: '#FFC107' }]}>
+              {locationError}
+            </Text>
+          </View>
         )}
 
-        <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
-          <TouchableOpacity
-            style={[styles.panicButton, { backgroundColor: '#008000' }]}
-            onPress={handlePanicPress}
-            disabled={loading}
-          >
-            <MaterialCommunityIcons 
-              name="alert-circle" 
-              size={64} 
-              color="white" 
-            />
-            <Text style={styles.panicButtonText}>
-              {loading ? 'Enviando...' : 'ENVIAR ALERTA'}
-            </Text>
-          </TouchableOpacity>
-        </Animated.View>
+        <View style={styles.buttonContainer}>
+          <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+            <TouchableOpacity
+              style={[
+                styles.alertButton,
+                {
+                  backgroundColor: colors.error,
+                  opacity: loading ? 0.7 : 1,
+                },
+              ]}
+              onPress={handleTacticalAlert}
+              disabled={loading}
+            >
+              <MaterialCommunityIcons
+                name="shield-alert"
+                size={40}
+                color={colors.white}
+              />
+              <Text style={[styles.alertButtonText, { color: colors.white }]}>
+                {loading ? 'ACTIVANDO...' : 'ACTIVAR ALERTA'}
+              </Text>
+              <Text style={[styles.alertButtonSubtext, { color: colors.white }]}>
+                Protocolo de Emergencia
+              </Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
 
-        <View style={styles.emergencyContacts}>
-          <Text style={[styles.contactsTitle, { color: colors.text }]}>
-            Contactos de Emergencia
+        <View style={styles.instructionsContainer}>
+          <Text style={[styles.instructionsTitle, { color: colors.text }]}>
+            Protocolo SEA Policía
           </Text>
-          
-          <TouchableOpacity 
-            style={[styles.contactButton, { backgroundColor: colors.card }]}
+          <View style={styles.instructionItem}>
+            <Text style={[styles.instructionEmoji]}>🫡</Text>
+            <Text style={[styles.instructionText, { color: colors.text }]}>
+              <Text style={{ fontWeight: 'bold' }}>Saludar:</Text> Mantener calma y postura profesional
+            </Text>
+          </View>
+          <View style={styles.instructionItem}>
+            <Text style={[styles.instructionEmoji]}>👂</Text>
+            <Text style={[styles.instructionText, { color: colors.text }]}>
+              <Text style={{ fontWeight: 'bold' }}>Escuchar:</Text> Evaluar amenazas y obtener información
+            </Text>
+          </View>
+          <View style={styles.instructionItem}>
+            <Text style={[styles.instructionEmoji]}>⚡</Text>
+            <Text style={[styles.instructionText, { color: colors.text }]}>
+              <Text style={{ fontWeight: 'bold' }}>Actuar:</Text> Aplicar técnicas tácticas apropiadas
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.emergencyContainer}>
+          <Text style={[styles.emergencyTitle, { color: colors.text }]}>
+            Contactos de Comando
+          </Text>
+          <TouchableOpacity
+            style={[styles.emergencyButton, { backgroundColor: colors.primary }]}
             onPress={callEmergencyServices}
           >
-            <MaterialCommunityIcons 
-              name="phone" 
-              size={24} 
-              color="#008000" 
-            />
-            <Text style={[styles.contactText, { color: colors.text }]}>
-              Llamar a Emergencias ({EMERGENCY_NUMBERS.GENERAL})
+            <MaterialCommunityIcons name="phone" size={20} color={colors.white} />
+            <Text style={[styles.emergencyButtonText, { color: colors.white }]}>
+              Comando General: {EMERGENCY_NUMBERS.GENERAL}
             </Text>
           </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.contactButton, { backgroundColor: colors.card }]}
+          <TouchableOpacity
+            style={[styles.emergencyButton, { backgroundColor: colors.secondary }]}
             onPress={contactSchool}
           >
-            <MaterialCommunityIcons 
-              name="school" 
-              size={24} 
-              color="#008000" 
-            />
-            <Text style={[styles.contactText, { color: colors.text }]}>
-              Contactar Escuela
+            <MaterialCommunityIcons name="school" size={20} color={colors.white} />
+            <Text style={[styles.emergencyButtonText, { color: colors.white }]}>
+              Comando Institucional: {EMERGENCY_NUMBERS.SCHOOL}
             </Text>
           </TouchableOpacity>
         </View>
@@ -333,66 +391,123 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 20,
+  },
+  header: {
     alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 30,
+  },
+  headerIcon: {
+    marginBottom: 16,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 10,
     textAlign: 'center',
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 8,
   },
-  locationError: {
-    fontSize: 14,
-    textAlign: 'center',
+  statusContainer: {
+    flexDirection: 'row',
     marginBottom: 20,
-    paddingHorizontal: 20,
+    gap: 10,
   },
-  panicButton: {
+  statusCard: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+  statusText: {
+    fontSize: 14,
+    fontWeight: '500',
+    flex: 1,
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 20,
+    gap: 8,
+  },
+  errorText: {
+    fontSize: 14,
+    flex: 1,
+  },
+  buttonContainer: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  alertButton: {
     width: 200,
     height: 200,
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 40,
-    elevation: 5,
+    elevation: 8,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
-  panicButtonText: {
-    color: 'white',
+  alertButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 10,
+    marginTop: 8,
+    textAlign: 'center',
   },
-  emergencyContacts: {
-    width: '100%',
-    gap: 15,
+  alertButtonSubtext: {
+    fontSize: 12,
+    marginTop: 4,
+    textAlign: 'center',
   },
-  contactsTitle: {
+  instructionsContainer: {
+    marginBottom: 20,
+  },
+  instructionsTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 12,
   },
-  contactButton: {
+  instructionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
-    borderRadius: 12,
-    gap: 15,
+    marginBottom: 8,
+    gap: 12,
   },
-  contactText: {
+  instructionEmoji: {
+    fontSize: 20,
+    width: 30,
+  },
+  instructionText: {
+    fontSize: 14,
+    flex: 1,
+    lineHeight: 20,
+  },
+  emergencyContainer: {
+    marginTop: 'auto',
+  },
+  emergencyTitle: {
     fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  emergencyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    gap: 8,
+  },
+  emergencyButtonText: {
+    fontSize: 14,
     fontWeight: '500',
   },
 }); 

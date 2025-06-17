@@ -1,24 +1,37 @@
 {
   "cli": {
-    "version": ">= 5.9.1"
+    "version": ">= 7.8.4",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
       "android": {
-        "gradleCommand": ":app:assembleDebug"
+        "buildType": "apk",
+        "image": "latest"
+      },
+      "env": {
+        "NODE_ENV": "development"
       }
     },
     "preview": {
       "distribution": "internal",
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "image": "latest"
+      },
+      "env": {
+        "NODE_ENV": "production"
       }
     },
     "production": {
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "image": "latest"
+      },
+      "env": {
+        "NODE_ENV": "production"
       }
     }
   },

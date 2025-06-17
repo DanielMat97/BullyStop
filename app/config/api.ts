@@ -13,8 +13,8 @@ const isPhysicalDevice = () => {
 // URL base de la API
 // Para dispositivos físicos, usamos la IP del equipo en lugar de localhost
 export const API_URL = isPhysicalDevice() 
-  ? "https://bullystop-production.up.railway.app"  // IP del equipo (usar esta IP cuando pruebes en un dispositivo físico)
-  : "https://bullystop-production.up.railway.app";    // localhost (solo funciona en emulador)
+  ? "https://bullystop-production-3cd0.up.railway.app"  // IP del equipo (usar esta IP cuando pruebes en un dispositivo físico)
+  : "https://bullystop-production-3cd0.up.railway.app";    // localhost (solo funciona en emulador)
 
 // Timeout para peticiones en milisegundos
 export const API_TIMEOUT = 10000;

@@ -1,6 +1,8 @@
-import { useEffect } from 'react';
 import { Tabs } from 'expo-router';
-import { MaterialIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@react-navigation/native';
 import { useAuthContext } from '../../hooks/useAuthContext';
 
@@ -9,55 +11,53 @@ export default function TabLayout() {
   const { requireAuth } = useAuthContext();
 
   // Ensure user is authenticated for all tab screens
-  useEffect(() => {
-    requireAuth();
-  }, []);
+  requireAuth();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.text,
+        tabBarActiveTintColor: '#0D47A1', // SITAB primary blue
+        tabBarInactiveTintColor: colors.text + '60',
         tabBarStyle: {
           backgroundColor: colors.card,
+          borderTopColor: colors.border,
+          borderTopWidth: 1,
         },
-        tabBarShowLabel: true,
         headerShown: false,
-      }}
-    >
+      }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Inicio',
+          title: 'SITAB',
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="home" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="surveys"
-        options={{
-          title: 'Encuestas',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="assignment" size={size} color={color} />
+            <MaterialCommunityIcons name="shield-account" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="panic"
         options={{
-          title: 'Pánico',
+          title: 'Alerta Táctica',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="warning" size={size} color={color} />
+            <MaterialCommunityIcons name="shield-alert" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="surveys"
+        options={{
+          title: 'Evaluaciones',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="clipboard-check" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="resources"
         options={{
-          title: 'Recursos',
+          title: 'Manual Táctico',
           tabBarIcon: ({ color, size }) => (
-            <FontAwesome5 name="book" size={size} color={color} />
+            <MaterialCommunityIcons name="book-open-variant" size={size} color={color} />
           ),
         }}
       />

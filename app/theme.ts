@@ -1,14 +1,14 @@
 import { Theme } from '@react-navigation/native';
 
 const baseColors = {
-  primary: '#008000', // Verde bandera
-  secondary: '#556B2F', // Verde aceituna
-  accent: '#007A33', // Verde Pantone 356C
+  primary: '#0D47A1', // Azul oscuro institucional SITAB
+  secondary: '#1976D2', // Azul claro SITAB
+  accent: '#FFC107', // Amarillo SITAB (advertencia/acento)
   white: '#FFFFFF',
-  error: '#FF4444',
-  success: '#4CAF50',
-  warning: '#FFA726',
-  info: '#2196F3',
+  error: '#D32F2F',
+  success: '#388E3C',
+  warning: '#FFC107',
+  info: '#1976D2',
 };
 
 const baseFonts = {
@@ -33,10 +33,10 @@ const baseFonts = {
 export const lightTheme: Theme = {
   dark: false,
   colors: {
-    background: baseColors.white,
-    card: '#F5F5F5',
-    text: '#000000',
-    border: '#E0E0E0',
+    background: '#ECEFF1', // Gris neutro SITAB
+    card: baseColors.white,
+    text: '#1A1A1A',
+    border: '#B0BEC5',
     notification: baseColors.primary,
     ...baseColors,
   },
@@ -46,11 +46,11 @@ export const lightTheme: Theme = {
 export const darkTheme: Theme = {
   dark: true,
   colors: {
-    background: '#121212',
-    card: '#1E1E1E',
+    background: '#0A1929',
+    card: '#1E293B',
     text: baseColors.white,
-    border: '#2C2C2C',
-    notification: baseColors.primary,
+    border: '#334155',
+    notification: baseColors.secondary,
     ...baseColors,
   },
   fonts: baseFonts,

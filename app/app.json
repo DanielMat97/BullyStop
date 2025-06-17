@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "BullyStop",
-    "slug": "bullystop",
+    "name": "SITAB",
+    "slug": "SITAB",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "bullystop",
+    "scheme": "SITAB",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -16,13 +16,9 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.policia.bullystop",
+      "package": "com.policia.SITAB",
       "versionCode": 1,
-      "permissions": [],
-      "buildToolsVersion": "33.0.0",
-      "compileSdkVersion": 33,
-      "targetSdkVersion": 33,
-      "minSdkVersion": 21
+      "permissions": []
     },
     "web": {
       "bundler": "metro",
@@ -50,7 +46,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "c8b3b066-34eb-4620-b0c9-5cd543f72690"
+        "projectId": "56ef4b66-bf89-49e9-a353-c767d4c9de20"
       }
     },
     "owner": "stonestore"

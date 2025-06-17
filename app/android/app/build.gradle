@@ -86,9 +86,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.policia.bullystop'
+    namespace 'com.policia.SITAB'
     defaultConfig {
-        applicationId 'com.policia.bullystop'
+        applicationId 'com.policia.SITAB'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
